@@ -173,15 +173,15 @@ def worldwide_trend():
         figure={
             'data': traces,
             'layout': go.Layout(
-                    title="Infections Worldwide",
-                    xaxis_title="Date",
-                    yaxis_title="Number of Individuals",
-                    font=dict(color=colors['text']),
-                    paper_bgcolor=colors['background'],
-                    plot_bgcolor=colors['background'],
-                    xaxis=dict(gridcolor=colors['grid']),
-                    yaxis=dict(gridcolor=colors['grid'])
-                    )
+                title="Infections Worldwide",
+                xaxis_title="Date",
+                yaxis_title="Number of Individuals",
+                font=dict(color=colors['text']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                xaxis=dict(gridcolor=colors['grid']),
+                yaxis=dict(gridcolor=colors['grid'])
+                )
             }
         )
 
@@ -208,6 +208,50 @@ def active_countries(countries):
                     yaxis=dict(gridcolor=colors['grid'])
                 )
             }
+
+def stacked_active():
+    traces = []
+    for region in df['Country/Region'].unique():
+        if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Active'].sum() > 500:
+            traces.append(go.Scatter(
+                x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
+                y=df[df['Country/Region'] == region].groupby('date')['Active'].sum(),
+                name=region,
+                hoverinfo='x+y+z+text+name',
+                stackgroup='one'))
+    return dcc.Graph(
+        id='stacked_active',
+        figure={
+            'data': traces,
+            'layout': go.Layout(
+                title="COVID-19 Active Cases Worldwide (Countries with greater than 500 active cases)",
+                xaxis_title="Date",
+                yaxis_title="Number of Individuals",
+                font=dict(color=colors['text']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                xaxis=dict(gridcolor=colors['grid']),
+                yaxis=dict(gridcolor=colors['grid'])
+                )
+            }
+        )
+
+    # return dcc.Graph(
+    #     id='worldwide_trend',
+    #     figure={
+    #         'data': traces,
+    #         'layout': go.Layout(
+    #                 title="Infections Worldwide",
+    #                 xaxis_title="Date",
+    #                 yaxis_title="Number of Individuals",
+    #                 font=dict(color=colors['text']),
+    #                 paper_bgcolor=colors['background'],
+    #                 plot_bgcolor=colors['background'],
+    #                 xaxis=dict(gridcolor=colors['grid']),
+    #                 yaxis=dict(gridcolor=colors['grid'])
+    #                 )
+    #         }
+    #     )
 
 def world_map_confirmed():
     # World map
@@ -384,28 +428,53 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'display': 'inline-block'})
     ),
 
-    html.Div(
-        worldwide_trend(),
-        style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
-    ),
+    # html.Div(
+    #     worldwide_trend(),
+    #     style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
+    # ),
+
+    # html.Div([
+    #     dcc.Graph(id='active_countries'),
+    #     dcc.Dropdown(
+    #         id='country_select',
+    #         options=[{'label': i, 'value': i} for i in available_countries],
+    #         value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
+    #         multi=True,
+    #         style={'width': '95%', 'float': 'center'}
+    #     )],
+    #     style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
+    # ),
+
+
+
 
     html.Div([
-        dcc.Graph(id='active_countries'),
-        dcc.Dropdown(
-            id='country_select',
-            options=[{'label': i, 'value': i} for i in available_countries],
-            value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
-            multi=True
-        )],
-        style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
+        html.Div(
+            worldwide_trend(),
+            style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
+        ),
+        html.Div([
+            dcc.Graph(id='active_countries'),
+            dcc.Dropdown(
+                id='country_select',
+                options=[{'label': i, 'value': i} for i in available_countries],
+                value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
+                multi=True,
+                style={'width': '95%', 'float': 'center'}
+                )
+            ], style={'width': '50%', 'float': 'right', 'display': 'inline-block'})
+        ], style={'width': '99%', 'float': 'center', 'vertical-align': 'bottom'}
     ),
+
+
+
 
     html.Div(
         world_map_active(),
         style={'width': '50%', 'display': 'inline-block'}
         ),
     html.Div(
-        world_map_confirmed(),
+        stacked_active(),
         style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
         ),
 
