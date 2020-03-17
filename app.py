@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 
 import pandas as pd
 import numpy as np
@@ -20,6 +21,7 @@ init_notebook_mode(connected=True)
 
 
 app = dash.Dash()
+app.config.suppress_callback_exceptions=True
 
 def etl(source='web'):
     if source=='folder':
@@ -112,42 +114,44 @@ colors = {
     'red': '#BF0000'
 }
 
-available_countries = df['Country/Region'].unique()
-available_states = df['Province/State'].unique()
+available_countries = sorted(df['Country/Region'].unique())
+available_states = sorted(df[(df['Country/Region'] == 'US') &
+                             (df['date'] == df['date'].iloc[-1])]
+                             ['Province/State'].unique())
 
-def confirmed(df):
+def confirmed():
     value = df[df['date'] == df['date'].iloc[-1]]['Confirmed'].sum()
     text = '''
         # {:,}
-        CONFIRMED
+        CUMULATIVE CONFIRMED
     '''.format(value)
     return text
 
-def active(df):
+def active():
     value = df[df['date'] == df['date'].iloc[-1]]['Active'].sum()
     text = '''
         # {:,}
-        ACTIVE
+        CURRENTLY ACTIVE
     '''.format(value)
     return text
 
-def recovered(df):
+def recovered():
     value = df[df['date'] == df['date'].iloc[-1]]['Recovered'].sum()
     text = '''
         # {:,}
-        RECOVERED
+        RECOVERED CASES
     '''.format(value)
     return text
 
-def deaths(df):
+def deaths():
     value = df[df['date'] == df['date'].iloc[-1]]['Deaths'].sum()
     text = '''
         # {:,}
-        DEATHS
+        DEATHS TO DATE
     '''.format(value)
     return text
 
-def worldwide_trend(df):
+def worldwide_trend():
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Confirmed'].sum(),
@@ -169,7 +173,7 @@ def worldwide_trend(df):
         figure={
             'data': traces,
             'layout': go.Layout(
-                    title="COVID-19 infections Worldwide",
+                    title="Infections Worldwide",
                     xaxis_title="Date",
                     yaxis_title="Number of Individuals",
                     font=dict(color=colors['text']),
@@ -181,19 +185,20 @@ def worldwide_trend(df):
             }
         )
 
-def active_countries(df, countries=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']):
+@app.callback(
+    Output('active_countries', 'figure'),
+    [Input('country_select', 'value')])
+def active_countries(countries):
     traces = []
     for country in countries:
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == country].groupby('date')['date'].first(),
                     y=df[df['Country/Region'] == country].groupby('date')['Active'].sum(),
                     name=country))
-    return dcc.Graph(
-        id='active_countries',
-        figure={
+    return {
             'data': traces,
             'layout': go.Layout(
-                    title="Active COVID-19 cases",
+                    title="Active Cases",
                     xaxis_title="Date",
                     yaxis_title="Number of Individuals",
                     font=dict(color=colors['text']),
@@ -203,9 +208,8 @@ def active_countries(df, countries=['China', 'Italy', 'South Korea', 'US', 'Spai
                     yaxis=dict(gridcolor=colors['grid'])
                 )
             }
-        )
 
-def world_map_confirmed(df):
+def world_map_confirmed():
     # World map
     df_world_map = df[df['date'] == df['date'].iloc[-1]].groupby('Country/Region').agg({'Confirmed': 'sum',
                                                                                 'Longitude': 'mean',
@@ -263,7 +267,7 @@ def world_map_confirmed(df):
         }
     )
 
-def world_map_active(df):
+def world_map_active():
     # World map
     df_world_map = df[df['date'] == df['date'].iloc[-1]].groupby('Country/Region').agg({'Active': 'sum',
                                                                                 'Longitude': 'mean',
@@ -330,12 +334,25 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         }
     ),
 
-    html.Div(children='A basic dashboard for tracking the pandemic', style={
+    html.Div(children='Select focus for the dashboard', style={
         'textAlign': 'center',
         'color': colors['text']
     }),
 
-    html.Div(dcc.Markdown(confirmed(df), style={
+    html.Div(dcc.RadioItems(
+            id='global_format',
+            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States']],
+            value='Worldwide',
+            labelStyle={'float': 'center', 'display': 'inline-block'}
+        ), style={'textAlign': 'center',
+            'color': colors['text'],
+            'width': '100%',
+            'float': 'center',
+            'display': 'inline-block'
+        }
+    ),
+
+    html.Div(dcc.Markdown(confirmed(), style={
         'textAlign': 'center',
         'color': colors['red'],
         'width': '25%',
@@ -343,7 +360,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'display': 'inline-block'})
     ),
 
-    html.Div(dcc.Markdown(active(df), style={
+    html.Div(dcc.Markdown(active(), style={
         'textAlign': 'center',
         'color': colors['red'],
         'width': '25%',
@@ -351,7 +368,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'display': 'inline-block'})
     ),
 
-    html.Div(dcc.Markdown(deaths(df), style={
+    html.Div(dcc.Markdown(deaths(), style={
         'textAlign': 'center',
         'color': colors['red'],
         'width': '25%',
@@ -359,7 +376,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'display': 'inline-block'})
     ),
 
-    html.Div(dcc.Markdown(recovered(df), style={
+    html.Div(dcc.Markdown(recovered(), style={
         'textAlign': 'center',
         'color': colors['red'],
         'width': '25%',
@@ -368,22 +385,38 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     ),
 
     html.Div(
-        worldwide_trend(df),
+        worldwide_trend(),
         style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
     ),
 
-    html.Div(
-        active_countries(df),
+    html.Div([
+        dcc.Graph(id='active_countries'),
+        dcc.Dropdown(
+            id='country_select',
+            options=[{'label': i, 'value': i} for i in available_countries],
+            value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
+            multi=True
+        )],
         style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
     ),
 
     html.Div(
-        world_map_active(df),
+        world_map_active(),
         style={'width': '50%', 'display': 'inline-block'}
         ),
     html.Div(
-        world_map_confirmed(df),
+        world_map_confirmed(),
         style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
+        ),
+
+    html.Div(
+        dcc.Markdown('Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)'),
+        style={
+        'textAlign': 'center',
+        'color': '#FEFEFE',
+        'width': '100%',
+        'float': 'center',
+        'display': 'inline-block'}
         )
 ])
 
