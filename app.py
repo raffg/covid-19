@@ -311,9 +311,14 @@ def world_map_confirmed():
         }
     )
 
-def world_map_active():
+@app.callback(
+    Output('world_map_active', 'figure'),
+    [Input('date_slider', 'value')])
+def world_map_active(date_index):
     # World map
-    df_world_map = df[df['date'] == df['date'].iloc[-1]].groupby('Country/Region').agg({'Active': 'sum',
+    date = df['date'].unique()[date_index]
+    # date = df['date'].iloc[-1]
+    df_world_map = df[df['date'] == date].groupby('Country/Region').agg({'Active': 'sum',
                                                                                 'Longitude': 'mean',
                                                                                 'Latitude': 'mean',
                                                                                 'Country/Region': 'first'})
@@ -330,9 +335,10 @@ def world_map_active():
     df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Latitude'] = 56.2639
     df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Longitude'] = 9.5018
 
-    return dcc.Graph(
-        id='world_map_active',
-        figure={
+    df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Latitude'] = 52.1326
+    df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Longitude'] = 5.2913
+
+    return {
             'data': [
                 go.Scattergeo(
                     lon = df_world_map['Longitude'],
@@ -367,7 +373,6 @@ def world_map_active():
                 plot_bgcolor=colors['background']
             )
         }
-    )
 
 
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
@@ -428,26 +433,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'display': 'inline-block'})
     ),
 
-    # html.Div(
-    #     worldwide_trend(),
-    #     style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
-    # ),
-
-    # html.Div([
-    #     dcc.Graph(id='active_countries'),
-    #     dcc.Dropdown(
-    #         id='country_select',
-    #         options=[{'label': i, 'value': i} for i in available_countries],
-    #         value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
-    #         multi=True,
-    #         style={'width': '95%', 'float': 'center'}
-    #     )],
-    #     style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
-    # ),
-
-
-
-
     html.Div([
         html.Div(
             worldwide_trend(),
@@ -465,14 +450,20 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             ], style={'width': '50%', 'float': 'right', 'display': 'inline-block'})
         ], style={'width': '99%', 'float': 'center', 'vertical-align': 'bottom'}
     ),
+    
 
-
-
-
-    html.Div(
-        world_map_active(),
+    html.Div([
+        dcc.Graph(id='world_map_active'),
+        dcc.Slider(
+            id='date_slider',
+            min=list(range(len(df['date'].unique())))[0],
+            max=list(range(len(df['date'].unique())))[-1],
+            value=list(range(len(df['date'].unique())))[-1],
+            marks={(idx): (date if idx%10==0 else '') for idx, date in enumerate(sorted(set([item.strftime("%m-%d-%Y") for item in df['date']])))},
+            step=None)],
         style={'width': '50%', 'display': 'inline-block'}
         ),
+
     html.Div(
         stacked_active(),
         style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
