@@ -81,6 +81,143 @@ def etl(source='web'):
     df['Province/State'].replace('Cruise Ship', 'Diamond Princess cruise ship', inplace=True)
     df['Province/State'].replace('From Diamond Princess', 'Diamond Princess cruise ship', inplace=True)
 
+    # Replace old reporting standards
+    df['Province/State'].replace('Chicago', 'Illinois', inplace=True)
+    df['Province/State'].replace('Chicago, IL', 'Illinois', inplace=True)
+    df['Province/State'].replace('Cook County, IL', 'Illinois', inplace=True)
+    df['Province/State'].replace('Boston, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace(' Norfolk County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Suffolk County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Middlesex County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Norwell County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Plymouth County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Norfolk County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Berkshire County, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Unknown Location, MA', 'Massachusetts', inplace=True)
+    df['Province/State'].replace('Los Angeles, CA', 'California', inplace=True)
+    df['Province/State'].replace('Orange, CA', 'California', inplace=True)
+    df['Province/State'].replace('Santa Clara, CA', 'California', inplace=True)
+    df['Province/State'].replace('San Benito, CA', 'California', inplace=True)
+    df['Province/State'].replace('Humboldt County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Sacramento County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Travis, CA (From Diamond Princess)', 'California', inplace=True)
+    df['Province/State'].replace('Placer County, CA', 'California', inplace=True)
+    df['Province/State'].replace('San Mateo, CA', 'California', inplace=True)
+    df['Province/State'].replace('Sonoma County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Berkeley, CA', 'California', inplace=True)
+    df['Province/State'].replace('Orange County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Contra Costa County, CA', 'California', inplace=True)
+    df['Province/State'].replace('San Francisco County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Yolo County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Santa Clara County, CA', 'California', inplace=True)
+    df['Province/State'].replace('San Diego County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Travis, CA', 'California', inplace=True)
+    df['Province/State'].replace('Alameda County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Madera County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Santa Cruz County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Fresno County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Riverside County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Shasta County, CA', 'California', inplace=True)
+    df['Province/State'].replace('Seattle, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Snohomish County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('King County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Unassigned Location, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Clark County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Jefferson County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Pierce County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Kittitas County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Grant County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Spokane County, WA', 'Washington', inplace=True)
+    df['Province/State'].replace('Tempe, AZ', 'Arizona', inplace=True)
+    df['Province/State'].replace('Maricopa County, AZ', 'Arizona', inplace=True)
+    df['Province/State'].replace('Pinal County, AZ', 'Arizona', inplace=True)
+    df['Province/State'].replace('Madison, WI', 'Wisconsin', inplace=True)
+    df['Province/State'].replace('San Antonio, TX', 'Texas', inplace=True)
+    df['Province/State'].replace('Lackland, TX', 'Texas', inplace=True)
+    df['Province/State'].replace('Lackland, TX (From Diamond Princess)', 'Texas', inplace=True)
+    df['Province/State'].replace('Harris County, TX', 'Texas', inplace=True)
+    df['Province/State'].replace('Fort Bend County, TX', 'Texas', inplace=True)
+    df['Province/State'].replace('Montgomery County, TX', 'Texas', inplace=True)
+    df['Province/State'].replace('Collin County, TX', 'Texas', inplace=True)
+    df['Province/State'].replace('Ashland, NE', 'Nebraska', inplace=True)
+    df['Province/State'].replace('Omaha, NE (From Diamond Princess)', 'Nebraska', inplace=True)
+    df['Province/State'].replace('Douglas County, NE', 'Nebraska', inplace=True)
+    df['Province/State'].replace('Portland, OR', 'Oregon', inplace=True)
+    df['Province/State'].replace('Umatilla, OR', 'Oregon', inplace=True)
+    df['Province/State'].replace('Klamath County, OR', 'Oregon', inplace=True)
+    df['Province/State'].replace('Douglas County, OR', 'Oregon', inplace=True)
+    df['Province/State'].replace('Marion County, OR', 'Oregon', inplace=True)
+    df['Province/State'].replace('Jackson County, OR ', 'Oregon', inplace=True)
+    df['Province/State'].replace('Washington County, OR', 'Oregon', inplace=True)
+    df['Province/State'].replace('Providence, RI', 'Rhode Island', inplace=True)
+    df['Province/State'].replace('Providence County, RI', 'Rhode Island', inplace=True)
+    df['Province/State'].replace('Grafton County, NH', 'New Hampshire', inplace=True)
+    df['Province/State'].replace('Rockingham County, NH', 'New Hampshire', inplace=True)
+    df['Province/State'].replace('Hillsborough, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Sarasota, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Santa Rosa County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Broward County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Lee County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Volusia County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Manatee County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Okaloosa County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('Charlotte County, FL', 'Florida', inplace=True)
+    df['Province/State'].replace('New York City, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Westchester County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Queens County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('New York County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Nassau, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Nassau County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Rockland County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Saratoga County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Suffolk County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Ulster County, NY', 'New York', inplace=True)
+    df['Province/State'].replace('Fulton County, GA', 'Georgia', inplace=True)
+    df['Province/State'].replace('Floyd County, GA', 'Georgia', inplace=True)
+    df['Province/State'].replace('Polk County, GA', 'Georgia', inplace=True)
+    df['Province/State'].replace('Cherokee County, GA', 'Georgia', inplace=True)
+    df['Province/State'].replace('Cobb County, GA', 'Georgia', inplace=True)
+    df['Province/State'].replace('Wake County, NC', 'North Carolina', inplace=True)
+    df['Province/State'].replace('Chatham County, NC', 'North Carolina', inplace=True)
+    df['Province/State'].replace('Bergen County, NJ', 'New Jersey', inplace=True)
+    df['Province/State'].replace('Hudson County, NJ', 'New Jersey', inplace=True)
+    df['Province/State'].replace('Clark County, NV', 'Nevada', inplace=True)
+    df['Province/State'].replace('Washoe County, NV', 'Nevada', inplace=True)
+    df['Province/State'].replace('Williamson County, TN', 'Tennessee', inplace=True)
+    df['Province/State'].replace('Davidson County, TN', 'Tennessee', inplace=True)
+    df['Province/State'].replace('Shelby County, TN', 'Tennessee', inplace=True)
+    df['Province/State'].replace('Montgomery County, MD', 'Maryland', inplace=True)
+    df['Province/State'].replace('Harford County, MD', 'Maryland', inplace=True)
+    df['Province/State'].replace('Denver County, CO', 'Colorado', inplace=True)
+    df['Province/State'].replace('Summit County, CO', 'Colorado', inplace=True)
+    df['Province/State'].replace('Douglas County, CO', 'Colorado', inplace=True)
+    df['Province/State'].replace('El Paso County, CO', 'Colorado', inplace=True)
+    df['Province/State'].replace('Delaware County, PA', 'Pennsylvania', inplace=True)
+    df['Province/State'].replace('Wayne County, PA', 'Pennsylvania', inplace=True)
+    df['Province/State'].replace('Montgomery County, PA', 'Pennsylvania', inplace=True)
+    df['Province/State'].replace('Fayette County, KY', 'Kentucky', inplace=True)
+    df['Province/State'].replace('Jefferson County, KY', 'Kentucky', inplace=True)
+    df['Province/State'].replace('Harrison County, KY', 'Kentucky', inplace=True)
+    df['Province/State'].replace('Marion County, IN', 'Indiana', inplace=True)
+    df['Province/State'].replace('Hendricks County, IN', 'Indiana', inplace=True)
+    df['Province/State'].replace('Ramsey County, MN', 'Minnesota', inplace=True)
+    df['Province/State'].replace('Carver County, MN', 'Minnesota', inplace=True)
+    df['Province/State'].replace('Fairfield County, CT', 'Connecticut', inplace=True)
+    df['Province/State'].replace('Charleston County, SC', 'South Carolina', inplace=True)
+    df['Province/State'].replace('Spartanburg County, SC', 'South Carolina', inplace=True)
+    df['Province/State'].replace('Kershaw County, SC', 'South Carolina', inplace=True)
+    df['Province/State'].replace('Davis County, UT', 'Utah', inplace=True)
+    df['Province/State'].replace('Honolulu County, HI', 'Hawaii', inplace=True)
+    df['Province/State'].replace('Tulsa County, OK', 'Oklahoma', inplace=True)
+    df['Province/State'].replace('Fairfax County, VA', 'Virginia', inplace=True)
+    df['Province/State'].replace('St. Louis County, MO', 'Missouri', inplace=True)
+    df['Province/State'].replace('Unassigned Location, VT', 'Vermont', inplace=True)
+    df['Province/State'].replace('Bennington County, VT', 'Vermont', inplace=True)
+    df['Province/State'].replace('Johnson County, IA', 'Iowa', inplace=True)
+    df['Province/State'].replace('Jefferson Parish, LA', 'Louisiana', inplace=True)
+    df['Province/State'].replace('Johnson County, KS', 'Kansas', inplace=True)
+    df['Province/State'].replace('Washington, D.C.', 'District of Columbia', inplace=True)
+
     # South Korea data on March 10 seems to be mislabled as North Korea
     df.loc[(df['Country/Region'] == 'North Korea') & (df['date'] == '03-10-2020'), 'Country/Region'] = 'South Korea'
 
@@ -105,18 +242,19 @@ def etl(source='web'):
     df['Longitude'] = df['Longitude'].fillna(df.groupby('Province/State')['Longitude'].transform('mean'))
     return df
 
-df = etl(source='folder')
+data = etl(source='folder')
+df = data
 
 colors = {
     'background': '#111111',
-    'text': '#BEBEBE', #'#7FDBFF',
+    'text': '#BEBEBE',
     'grid': '#333333',
     'red': '#BF0000'
 }
 
 available_countries = sorted(df['Country/Region'].unique())
 
-available_states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
     'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
     'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
     'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
@@ -131,6 +269,22 @@ eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzego
     'Lithuania', 'Luxembourg', 'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands', 'North Macedonia', 'Norway',
     'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
     'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
+
+df_us = df[df['Province/State'].isin(states)]
+df_eu = df[df['Country/Region'].isin(eu)]
+df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
+                          'Country/Region': ['France', 'France'],
+                          'Province/State': [np.nan, np.nan],
+                          'Confirmed': [0, 0],
+                          'Deaths': [0, 0],
+                          'Recovered': [0, 0],
+                          'Latitude': [np.nan, np.nan],
+                          'Longitude': [np.nan, np.nan],
+                          'Active': [0, 0]})).sort_index()
+df = data
+
+df_us.drop('Country/Region', axis=1, inplace=True)
+df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
 
 def confirmed():
     value = df[df['date'] == df['date'].iloc[-1]]['Confirmed'].sum()
@@ -164,29 +318,43 @@ def deaths():
     '''.format(value)
     return text
 
-def worldwide_trend():
+@app.callback(
+    Output('worldwide_trend', 'figure'),
+    [Input('global_format', 'value')])
+def worldwide_trend(view):
+    if view == 'Worldwide':
+        df = data
+    elif view == 'United States':
+        df = df_us
+    elif view == 'Europe':
+        df = df_eu
+    else:
+        df = data
+
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Confirmed'].sum(),
-                    name="Total Confirmed"),
+                    name="Total Confirmed",
+                    mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Active'].sum(),
-                    name="Active Cases"),
+                    name="Active Cases",
+                    mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Recovered'].sum(),
-                    name="Recovered"),
+                    name="Recovered",
+                    mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Deaths'].sum(),
-                    name="Deaths")]
-    return dcc.Graph(
-        id='worldwide_trend',
-        figure={
+                    name="Deaths",
+                    mode='lines')]
+    return {
             'data': traces,
             'layout': go.Layout(
-                title="Worldwide Infections",
+                title="{} Infections".format(view),
                 xaxis_title="Date",
                 yaxis_title="Number of Individuals",
                 font=dict(color=colors['text']),
@@ -196,7 +364,6 @@ def worldwide_trend():
                 yaxis=dict(gridcolor=colors['grid'])
                 )
             }
-        )
 
 @app.callback(
     Output('active_countries', 'figure'),
@@ -225,11 +392,25 @@ def active_countries(countries):
 
 @app.callback(
     Output('stacked_active', 'figure'),
-    [Input('column_select', 'value')])
-def stacked_active(column):
+    [Input('global_format', 'value'),
+     Input('column_select', 'value')])
+def stacked_active(view, column):
+    if view == 'Worldwide':
+        df = data
+        scope = 1000
+    elif view == 'United States':
+        df = df_us
+        scope = 20
+    elif view == 'Europe':
+        df = df_eu
+        scope = 1000
+    else:
+        df = data
+        scope = 1000
+
     traces = []
     for region in df['Country/Region'].unique():
-        if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Confirmed'].sum() > 1000:
+        if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Confirmed'].sum() > scope:
             traces.append(go.Scatter(
                 x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
                 y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
@@ -239,7 +420,12 @@ def stacked_active(column):
     return {
             'data': traces,
             'layout': go.Layout(
-                title="{} Cases Worldwide (Countries with greater than 1000 confirmed cases)".format(column),
+                title="{} {} Cases (Regions with greater than {} confirmed cases)".format(view, column, scope),
+                # annotations=[dict(x=1,
+                #                 y=1,
+                #                 text = 'Regions with greater than {} confirmed cases'.format(scope),
+                #                 showarrow=False,
+                #                 xanchor='center')],
                 xaxis_title="Date",
                 yaxis_title="Number of Individuals",
                 font=dict(color=colors['text']),
@@ -311,8 +497,26 @@ def world_map_confirmed():
 
 @app.callback(
     Output('world_map_active', 'figure'),
-    [Input('date_slider', 'value')])
-def world_map_active(date_index):
+    [Input('global_format', 'value'),
+     Input('date_slider', 'value')])
+def world_map_active(view, date_index):
+    if view == 'Worldwide':
+        df = data
+        scope='world'
+        projection_type='natural earth'
+    elif view == 'United States':
+        df = df_us
+        scope='usa'
+        projection_type='albers usa'
+    elif view == 'Europe':
+        df = df_eu
+        scope='europe'
+        projection_type='natural earth'
+    else:
+        df = data
+        scope='world'
+        projection_type='natural earth',
+
     # World map
     date = df['date'].unique()[date_index]
     # date = df['date'].iloc[-1]
@@ -358,8 +562,8 @@ def world_map_active(date_index):
             ],
             'layout': go.Layout(
                 title ='Active Cases by Geography',
-                geo=dict(scope='world',
-                        projection_type="natural earth",
+                geo=dict(scope=scope,
+                        projection_type=projection_type,
                         showland = True,
                         landcolor = "rgb(100, 125, 100)",
                         showocean = True,
@@ -433,7 +637,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
     html.Div([
         html.Div(
-            worldwide_trend(),
+            dcc.Graph(id='worldwide_trend'),
             style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
             ),
 
