@@ -115,9 +115,22 @@ colors = {
 }
 
 available_countries = sorted(df['Country/Region'].unique())
-available_states = sorted(df[(df['Country/Region'] == 'US') &
-                             (df['date'] == df['date'].iloc[-1])]
-                             ['Province/State'].unique())
+
+available_states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+    'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
+    'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
+    'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+    'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+    'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+    'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+
+eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
+    'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
+    'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Kosovo', 'Latvia', 'Liechtenstein',
+    'Lithuania', 'Luxembourg', 'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands', 'North Macedonia', 'Norway',
+    'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+    'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
 
 def confirmed():
     value = df[df['date'] == df['date'].iloc[-1]]['Confirmed'].sum()
@@ -173,7 +186,7 @@ def worldwide_trend():
         figure={
             'data': traces,
             'layout': go.Layout(
-                title="Infections Worldwide",
+                title="Worldwide Infections",
                 xaxis_title="Date",
                 yaxis_title="Number of Individuals",
                 font=dict(color=colors['text']),
@@ -198,7 +211,7 @@ def active_countries(countries):
     return {
             'data': traces,
             'layout': go.Layout(
-                    title="Active Cases",
+                    title="Active Cases by Country",
                     xaxis_title="Date",
                     yaxis_title="Number of Individuals",
                     font=dict(color=colors['text']),
@@ -224,7 +237,7 @@ def stacked_active():
         figure={
             'data': traces,
             'layout': go.Layout(
-                title="COVID-19 Active Cases Worldwide (Countries with greater than 500 active cases)",
+                title="Active Cases Worldwide (Countries with greater than 500 active cases)",
                 xaxis_title="Date",
                 yaxis_title="Number of Individuals",
                 font=dict(color=colors['text']),
@@ -359,7 +372,7 @@ def world_map_active(date_index):
                     )
             ],
             'layout': go.Layout(
-                title ='Number of active cases by country',
+                title ='Active Cases by Geography',
                 geo=dict(scope='world',
                         projection_type="natural earth",
                         showland = True,
@@ -390,7 +403,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
     html.Div(dcc.RadioItems(
             id='global_format',
-            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States']],
+            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Europe']],
             value='Worldwide',
             labelStyle={'float': 'center', 'display': 'inline-block'}
         ), style={'textAlign': 'center',
@@ -438,16 +451,10 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             worldwide_trend(),
             style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
         ),
-        html.Div([
-            dcc.Graph(id='active_countries'),
-            dcc.Dropdown(
-                id='country_select',
-                options=[{'label': i, 'value': i} for i in available_countries],
-                value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
-                multi=True,
-                style={'width': '95%', 'float': 'center'}
-                )
-            ], style={'width': '50%', 'float': 'right', 'display': 'inline-block'})
+        html.Div(
+        stacked_active(),
+        style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
+        )
         ], style={'width': '99%', 'float': 'center', 'vertical-align': 'bottom'}
     ),
     
@@ -464,13 +471,22 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         style={'width': '50%', 'display': 'inline-block'}
         ),
 
-    html.Div(
-        stacked_active(),
-        style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
-        ),
+    html.Div([
+            dcc.Graph(id='active_countries'),
+            dcc.Dropdown(
+                id='country_select',
+                options=[{'label': i, 'value': i} for i in available_countries],
+                value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
+                multi=True,
+                style={'width': '95%', 'float': 'center'}
+                )
+            ], style={'width': '50%', 'float': 'right', 'display': 'inline-block'}),
 
     html.Div(
-        dcc.Markdown('Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)'),
+        dcc.Markdown('''
+        Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
+        Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)
+        '''),
         style={
         'textAlign': 'center',
         'color': '#FEFEFE',
