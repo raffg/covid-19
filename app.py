@@ -222,22 +222,23 @@ def active_countries(countries):
                 )
             }
 
-def stacked_active():
+@app.callback(
+    Output('stacked_active', 'figure'),
+    [Input('column_select', 'value')])
+def stacked_active(column):
     traces = []
     for region in df['Country/Region'].unique():
-        if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Active'].sum() > 500:
+        if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Confirmed'].sum() > 1000:
             traces.append(go.Scatter(
                 x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
-                y=df[df['Country/Region'] == region].groupby('date')['Active'].sum(),
+                y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
                 name=region,
                 hoverinfo='x+y+z+text+name',
                 stackgroup='one'))
-    return dcc.Graph(
-        id='stacked_active',
-        figure={
+    return {
             'data': traces,
             'layout': go.Layout(
-                title="Active Cases Worldwide (Countries with greater than 500 active cases)",
+                title="{} Cases Worldwide (Countries with greater than 1000 confirmed cases)".format(column),
                 xaxis_title="Date",
                 yaxis_title="Number of Individuals",
                 font=dict(color=colors['text']),
@@ -245,26 +246,8 @@ def stacked_active():
                 plot_bgcolor=colors['background'],
                 xaxis=dict(gridcolor=colors['grid']),
                 yaxis=dict(gridcolor=colors['grid'])
-                )
-            }
-        )
-
-    # return dcc.Graph(
-    #     id='worldwide_trend',
-    #     figure={
-    #         'data': traces,
-    #         'layout': go.Layout(
-    #                 title="Infections Worldwide",
-    #                 xaxis_title="Date",
-    #                 yaxis_title="Number of Individuals",
-    #                 font=dict(color=colors['text']),
-    #                 paper_bgcolor=colors['background'],
-    #                 plot_bgcolor=colors['background'],
-    #                 xaxis=dict(gridcolor=colors['grid']),
-    #                 yaxis=dict(gridcolor=colors['grid'])
-    #                 )
-    #         }
-    #     )
+            )
+        }
 
 def world_map_confirmed():
     # World map
@@ -450,14 +433,27 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         html.Div(
             worldwide_trend(),
             style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
-        ),
-        html.Div(
-        stacked_active(),
-        style={'width': '50%', 'float': 'right', 'display': 'inline-block'}
-        )
-        ], style={'width': '99%', 'float': 'center', 'vertical-align': 'bottom'}
+            ),
+
+        html.Div([
+            dcc.Graph(id='stacked_active'),
+            html.Div(dcc.RadioItems(
+                        id='column_select',
+                        options=[{'label': i, 'value': i} for i in ['Confirmed', 'Active', 'Recovered', 'Deaths']],
+                        value='Active',
+                        labelStyle={'float': 'center', 'display': 'inline-block'},
+                        style={'textAlign': 'center',
+                            'color': colors['text'],
+                            'width': '100%',
+                            'float': 'center',
+                            'display': 'inline-block'
+                            }),
+                    style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
+            ],
+            style={'width': '50%', 'float': 'right', 'vertical-align': 'bottom'}
+        )],
+        style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
     ),
-    
 
     html.Div([
         dcc.Graph(id='world_map_active'),
