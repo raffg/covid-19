@@ -218,7 +218,8 @@ def active_countries(countries):
                     paper_bgcolor=colors['background'],
                     plot_bgcolor=colors['background'],
                     xaxis=dict(gridcolor=colors['grid']),
-                    yaxis=dict(gridcolor=colors['grid'])
+                    yaxis=dict(gridcolor=colors['grid']),
+                    hovermode='closest'
                 )
             }
 
@@ -245,7 +246,8 @@ def stacked_active(column):
                 paper_bgcolor=colors['background'],
                 plot_bgcolor=colors['background'],
                 xaxis=dict(gridcolor=colors['grid']),
-                yaxis=dict(gridcolor=colors['grid'])
+                yaxis=dict(gridcolor=colors['grid']),
+                hovermode='closest'
             )
         }
 
