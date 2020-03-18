@@ -286,37 +286,145 @@ df = data
 df_us.drop('Country/Region', axis=1, inplace=True)
 df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
 
-def confirmed():
+@app.callback(
+    Output('confirmed_ind', 'figure'),
+    [Input('global_format', 'value')])
+def confirmed(view):
+    if view == 'Worldwide':
+        df = data
+    elif view == 'United States':
+        df = df_us
+    elif view == 'Europe':
+        df = df_eu
+    else:
+        df = data
+
     value = df[df['date'] == df['date'].iloc[-1]]['Confirmed'].sum()
-    text = '''
-        # {:,}
-        CUMULATIVE CONFIRMED
-    '''.format(value)
-    return text
+    delta = df[df['date'] == df['date'].unique()[-2]]['Confirmed'].sum()
+    return {
+            'data': [{'type': 'indicator',
+                    'mode': 'number+delta',
+                    'value': value,
+                    'delta': {'reference': delta,
+                              'valueformat': '.2%',
+                              'relative': True,
+                              'font': {'size': 25}},
+                    'number': {'valueformat': ',',
+                              'font': {'size': 50}},
+                    'domain': {'y': [0, 1], 'x': [0, 1]}}],
+            'layout': go.Layout(
+                title={'text': "CUMULATIVE CONFIRMED"},
+                font=dict(color=colors['red']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                height=200
+                )
+            }
 
-def active():
+@app.callback(
+    Output('active_ind', 'figure'),
+    [Input('global_format', 'value')])
+def active(view):
+    if view == 'Worldwide':
+        df = data
+    elif view == 'United States':
+        df = df_us
+    elif view == 'Europe':
+        df = df_eu
+    else:
+        df = data
+
     value = df[df['date'] == df['date'].iloc[-1]]['Active'].sum()
-    text = '''
-        # {:,}
-        CURRENTLY ACTIVE
-    '''.format(value)
-    return text
+    delta = df[df['date'] == df['date'].unique()[-2]]['Active'].sum()
+    return {
+            'data': [{'type': 'indicator',
+                    'mode': 'number+delta',
+                    'value': value,
+                    'delta': {'reference': delta,
+                              'valueformat': '.2%',
+                              'relative': True,
+                              'font': {'size': 25}},
+                    'number': {'valueformat': ',',
+                              'font': {'size': 50}},
+                    'domain': {'y': [0, 1], 'x': [0, 1]}}],
+            'layout': go.Layout(
+                title={'text': "CURRENTLY ACTIVE"},
+                font=dict(color=colors['red']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                height=200
+                )
+            }
 
-def recovered():
+@app.callback(
+    Output('recovered_ind', 'figure'),
+    [Input('global_format', 'value')])
+def recovered(view):
+    if view == 'Worldwide':
+        df = data
+    elif view == 'United States':
+        df = df_us
+    elif view == 'Europe':
+        df = df_eu
+    else:
+        df = data
+
     value = df[df['date'] == df['date'].iloc[-1]]['Recovered'].sum()
-    text = '''
-        # {:,}
-        RECOVERED CASES
-    '''.format(value)
-    return text
+    delta = df[df['date'] == df['date'].unique()[-2]]['Recovered'].sum()
+    return {
+            'data': [{'type': 'indicator',
+                    'mode': 'number+delta',
+                    'value': value,
+                    'delta': {'reference': delta,
+                              'valueformat': '.2%',
+                              'relative': True,
+                              'font': {'size': 25}},
+                    'number': {'valueformat': ',',
+                              'font': {'size': 50}},
+                    'domain': {'y': [0, 1], 'x': [0, 1]}}],
+            'layout': go.Layout(
+                title={'text': "RECOVERED CASES"},
+                font=dict(color=colors['red']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                height=200
+                )
+            }
 
-def deaths():
+@app.callback(
+    Output('deaths_ind', 'figure'),
+    [Input('global_format', 'value')])
+def deaths(view):
+    if view == 'Worldwide':
+        df = data
+    elif view == 'United States':
+        df = df_us
+    elif view == 'Europe':
+        df = df_eu
+    else:
+        df = data
+
     value = df[df['date'] == df['date'].iloc[-1]]['Deaths'].sum()
-    text = '''
-        # {:,}
-        DEATHS TO DATE
-    '''.format(value)
-    return text
+    delta = df[df['date'] == df['date'].unique()[-2]]['Deaths'].sum()
+    return {
+            'data': [{'type': 'indicator',
+                    'mode': 'number+delta',
+                    'value': value,
+                    'delta': {'reference': delta,
+                              'valueformat': '.2%',
+                              'relative': True,
+                              'font': {'size': 25}},
+                    'number': {'valueformat': ',',
+                              'font': {'size': 50}},
+                    'domain': {'y': [0, 1], 'x': [0, 1]}}],
+            'layout': go.Layout(
+                title={'text': "DEATHS TO DATE"},
+                font=dict(color=colors['red']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                height=200
+                )
+            }
 
 @app.callback(
     Output('worldwide_trend', 'figure'),
@@ -603,37 +711,49 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         }
     ),
 
-    html.Div(dcc.Markdown(confirmed(), style={
-        'textAlign': 'center',
-        'color': colors['red'],
-        'width': '25%',
-        'float': 'left',
-        'display': 'inline-block'})
-    ),
+    html.Div(
+        dcc.Graph(id='confirmed_ind'),
+        style={
+            'textAlign': 'center',
+            'color': colors['red'],
+            'width': '25%',
+            'float': 'left',
+            'display': 'inline-block'
+            }
+        ),
 
-    html.Div(dcc.Markdown(active(), style={
-        'textAlign': 'center',
-        'color': colors['red'],
-        'width': '25%',
-        'float': 'left',
-        'display': 'inline-block'})
-    ),
+    html.Div(
+        dcc.Graph(id='active_ind'),
+        style={
+            'textAlign': 'center',
+            'color': colors['red'],
+            'width': '25%',
+            'float': 'left',
+            'display': 'inline-block'
+            }
+        ),
 
-    html.Div(dcc.Markdown(deaths(), style={
-        'textAlign': 'center',
-        'color': colors['red'],
-        'width': '25%',
-        'float': 'right',
-        'display': 'inline-block'})
-    ),
+    html.Div(
+        dcc.Graph(id='deaths_ind'),
+        style={
+            'textAlign': 'center',
+            'color': colors['red'],
+            'width': '25%',
+            'float': 'left',
+            'display': 'inline-block'
+            }
+        ),
 
-    html.Div(dcc.Markdown(recovered(), style={
-        'textAlign': 'center',
-        'color': colors['red'],
-        'width': '25%',
-        'float': 'right',
-        'display': 'inline-block'})
-    ),
+    html.Div(
+        dcc.Graph(id='recovered_ind'),
+        style={
+            'textAlign': 'center',
+            'color': colors['red'],
+            'width': '25%',
+            'float': 'left',
+            'display': 'inline-block'
+            }
+        ),
 
     html.Div([
         html.Div(
