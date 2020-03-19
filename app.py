@@ -21,6 +21,7 @@ init_notebook_mode(connected=True)
 
 
 app = dash.Dash()
+server = app.server
 app.config.suppress_callback_exceptions=True
 
 def etl(source='web'):
