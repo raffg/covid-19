@@ -242,8 +242,9 @@ def etl(source='web'):
     df['Longitude'] = df['Longitude'].fillna(df.groupby('Province/State')['Longitude'].transform('mean'))
     return df
 
-data = etl(source='folder')
-df = data
+# data = etl(source='folder')
+data = pd.read_csv('dashboard_data.csv')
+data['date'] = pd.to_datetime(data['date'])
 
 colors = {
     'background': '#111111',
@@ -252,7 +253,7 @@ colors = {
     'red': '#BF0000'
 }
 
-available_countries = sorted(df['Country/Region'].unique())
+available_countries = sorted(data['Country/Region'].unique())
 
 states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
     'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
@@ -272,8 +273,8 @@ eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzego
 
 region_options = {'Worldwide': available_countries, 'United States': states, 'Europe': eu}
 
-df_us = df[df['Province/State'].isin(states)]
-df_eu = df[df['Country/Region'].isin(eu)]
+df_us = data[data['Province/State'].isin(states)]
+df_eu = data[data['Country/Region'].isin(eu)]
 df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
                           'Country/Region': ['France', 'France'],
                           'Province/State': [np.nan, np.nan],
@@ -283,7 +284,6 @@ df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_
                           'Latitude': [np.nan, np.nan],
                           'Longitude': [np.nan, np.nan],
                           'Active': [0, 0]})).sort_index()
-df = data
 
 df_us.drop('Country/Region', axis=1, inplace=True)
 df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
@@ -819,10 +819,12 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         dcc.Graph(id='world_map_active'),
         dcc.Slider(
             id='date_slider',
-            min=list(range(len(df['date'].unique())))[0],
-            max=list(range(len(df['date'].unique())))[-1],
-            value=list(range(len(df['date'].unique())))[-1],
-            marks={(idx): (date if idx%10==0 else '') for idx, date in enumerate(sorted(set([item.strftime("%m-%d-%Y") for item in df['date']])))},
+            min=list(range(len(data['date'].unique())))[0],
+            max=list(range(len(data['date'].unique())))[-1],
+            value=list(range(len(data['date'].unique())))[-1],
+            marks={(idx): (date if idx%10==0 else '') for idx, date in
+                enumerate(sorted(set([item.strftime("%m-%d-%Y") for
+                item in data['date']])))},
             step=None)],
         style={'width': '50%', 'display': 'inline-block'}
         ),
