@@ -23,6 +23,7 @@ init_notebook_mode(connected=True)
 app = dash.Dash()
 server = app.server
 app.config.suppress_callback_exceptions=True
+app.title = 'COVID-19'
 
 def etl(source='web'):
     if source=='folder':
