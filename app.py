@@ -270,6 +270,8 @@ eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzego
     'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
     'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
 
+region_options = {'Worldwide': available_countries, 'United States': states, 'Europe': eu}
+
 df_us = df[df['Province/State'].isin(states)]
 df_eu = df[df['Country/Region'].isin(eu)]
 df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
@@ -474,19 +476,50 @@ def worldwide_trend(view):
             }
 
 @app.callback(
+    Output('country_select', 'options'),
+    [Input('global_format', 'value')])
+def set_active_options(selected_view):
+    return [{'label': i, 'value': i} for i in region_options[selected_view]]
+
+@app.callback(
+    Output('country_select', 'value'),
+    [Input('global_format', 'value'),
+     Input('country_select', 'options')])
+def set_countries_value(view, available_options):
+    if view == 'Worldwide':
+        return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']
+    elif view == 'United States':
+        return ['California', 'Colorado', 'Florida', 'New York', 'Washington']
+    elif view == 'Europe':
+        return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
+    else:
+        return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']
+
+@app.callback(
     Output('active_countries', 'figure'),
-    [Input('country_select', 'value')])
-def active_countries(countries):
+    [Input('global_format', 'value'),
+     Input('country_select', 'value')])
+def active_countries(view, countries):
+    if view == 'Worldwide':
+        df = data
+    elif view == 'United States':
+        df = df_us
+    elif view == 'Europe':
+        df = df_eu
+    else:
+        df = data
+
     traces = []
     for country in countries:
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == country].groupby('date')['date'].first(),
                     y=df[df['Country/Region'] == country].groupby('date')['Active'].sum(),
-                    name=country))
+                    name=country,
+                    mode='lines'))
     return {
             'data': traces,
             'layout': go.Layout(
-                    title="Active Cases by Country",
+                    title="Active Cases by Region",
                     xaxis_title="Date",
                     yaxis_title="Number of Individuals",
                     font=dict(color=colors['text']),
@@ -691,25 +724,26 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             'textAlign': 'center',
             'color': colors['text']
         }
-    ),
+        ),
 
     html.Div(children='Select focus for the dashboard', style={
         'textAlign': 'center',
         'color': colors['text']
-    }),
+        }),
 
-    html.Div(dcc.RadioItems(
+    html.Div(
+        dcc.RadioItems(
             id='global_format',
             options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Europe']],
             value='Worldwide',
             labelStyle={'float': 'center', 'display': 'inline-block'}
-        ), style={'textAlign': 'center',
-            'color': colors['text'],
-            'width': '100%',
-            'float': 'center',
-            'display': 'inline-block'
-        }
-    ),
+            ), style={'textAlign': 'center',
+                'color': colors['text'],
+                'width': '100%',
+                'float': 'center',
+                'display': 'inline-block'
+            }
+        ),
 
     html.Div(
         dcc.Graph(id='confirmed_ind'),
@@ -779,7 +813,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             style={'width': '50%', 'float': 'right', 'vertical-align': 'bottom'}
         )],
         style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
-    ),
+        ),
 
     html.Div([
         dcc.Graph(id='world_map_active'),
@@ -797,8 +831,6 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             dcc.Graph(id='active_countries'),
             dcc.Dropdown(
                 id='country_select',
-                options=[{'label': i, 'value': i} for i in available_countries],
-                value=['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany'],
                 multi=True,
                 style={'width': '95%', 'float': 'center'}
                 )
@@ -806,17 +838,17 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
     html.Div(
         dcc.Markdown('''
-        Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
-        Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)
-        '''),
-        style={
-        'textAlign': 'center',
-        'color': '#FEFEFE',
-        'width': '100%',
-        'float': 'center',
-        'display': 'inline-block'}
-        )
-])
+            Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
+            Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)
+            '''),
+            style={
+                'textAlign': 'center',
+                'color': '#FEFEFE',
+                'width': '100%',
+                'float': 'center',
+                'display': 'inline-block'}
+            )
+        ])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
