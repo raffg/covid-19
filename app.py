@@ -26,7 +26,7 @@ app.config.suppress_callback_exceptions=True
 def etl(source='web'):
     if source=='folder':
         # Load files from folder
-        path = 'COVID-19/csse_covid_19_data/csse_covid_19_daily_reports'
+        path = 'data'
         all_files = glob.glob(path + "/*.csv")
 
         files = []
@@ -851,4 +851,4 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
