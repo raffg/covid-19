@@ -608,9 +608,14 @@ def world_map_active(view, date_index):
                                                                         'Latitude': 'mean',
                                                                         'Country/Region': 'first'})
 
-    df_world_map['share_of_last_week'] = ((df[df['date'] == df['date'].unique()[-1]].groupby('Country/Region')['Confirmed'].sum() -
-                                df[df['date'] == df['date'].unique()[-7]].groupby('Country/Region')['Confirmed'].sum()) /
-                                df[df['date'] == df['date'].unique()[-1]].groupby('Country/Region')['Confirmed'].sum()) * 100
+    if date_index > 7:
+        idx7 = date_index - 7
+    else:
+        idx7 = 0
+
+    df_world_map['share_of_last_week'] = ((df[df['date'] == date].groupby('Country/Region')['Confirmed'].sum() -
+                                df[df['date'] == df['date'].unique()[idx7]].groupby('Country/Region')['Confirmed'].sum()) /
+                                df[df['date'] == date].groupby('Country/Region')['Confirmed'].sum()) * 100
 
     df_world_map['percentage'] = df_world_map['share_of_last_week'].fillna(0).apply(lambda x: '{:.0f}'.format(x)).fillna(0)
 
@@ -648,7 +653,7 @@ def world_map_active(view, date_index):
                                 colorscale = 'Reds',
                                 cmin = 0,
                                 color = df_world_map['share_of_last_week'],
-                                cmax = df_world_map['share_of_last_week'].max(),
+                                cmax = 100,
                                 colorbar_title="Percentage")
                     )
             ],
