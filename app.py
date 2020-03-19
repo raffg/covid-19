@@ -254,6 +254,8 @@ colors = {
     'red': '#BF0000'
 }
 
+font = 'Tahoma'
+
 available_countries = sorted(data['Country/Region'].unique())
 
 states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
@@ -680,13 +682,14 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         style={
             'textAlign': 'center',
             'color': colors['text'],
-            'fontFamily': 'Open Sans'
+            'fontFamily': font
             }
         ),
 
     html.Div(children='Select focus for the dashboard', style={
         'textAlign': 'center',
-        'color': colors['text']
+        'color': colors['text'],
+            'fontFamily': font
         }),
 
     html.Div(
@@ -699,7 +702,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 'color': colors['text'],
                 'width': '100%',
                 'float': 'center',
-                'display': 'inline-block'
+                'display': 'inline-block',
+                'fontFamily': font
             }
         ),
 
@@ -764,7 +768,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                             'color': colors['text'],
                             'width': '100%',
                             'float': 'center',
-                            'display': 'inline-block'
+                            'display': 'inline-block',
+                            'fontFamily': font
                             }),
                     style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
             ],
@@ -784,7 +789,9 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 enumerate(sorted(set([item.strftime("%m-%d-%Y") for
                 item in data['date']])))},
             step=None)],
-        style={'width': '50%', 'display': 'inline-block'}
+        style={'width': '50%',
+            'display': 'inline-block',
+            'fontFamily': 'Tahoma'}
         ),
 
     html.Div([
@@ -794,7 +801,10 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 multi=True,
                 style={'width': '95%', 'float': 'center'}
                 )
-            ], style={'width': '50%', 'float': 'right', 'display': 'inline-block'}),
+            ], style={'width': '50%',
+                'float': 'right',
+                'display': 'inline-block',
+                'fontFamily': 'Tahoma'}),
 
     html.Div(
         dcc.Markdown('''
@@ -806,7 +816,8 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 'color': '#FEFEFE',
                 'width': '100%',
                 'float': 'center',
-                'display': 'inline-block'}
+                'display': 'inline-block',
+                'fontFamily': font}
             )
         ])
 
