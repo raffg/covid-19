@@ -679,8 +679,9 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.H1(children='COVID-19',
         style={
             'textAlign': 'center',
-            'color': colors['text']
-        }
+            'color': colors['text'],
+            'fontFamily': 'Open Sans'
+            }
         ),
 
     html.Div(children='Select focus for the dashboard', style={
@@ -810,4 +811,4 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
