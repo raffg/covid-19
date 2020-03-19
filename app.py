@@ -561,7 +561,7 @@ def stacked_active(view, column):
     return {
             'data': traces,
             'layout': go.Layout(
-                title="{} {} Cases (Regions with greater than {} confirmed cases)".format(view, column, scope),
+                title="{} {} Cases<br>(Regions with greater than {} confirmed cases)".format(view, column, scope),
                 # annotations=[dict(x=1,
                 #                 y=1,
                 #                 text = 'Regions with greater than {} confirmed cases'.format(scope),
@@ -577,64 +577,6 @@ def stacked_active(view, column):
                 hovermode='closest'
             )
         }
-
-def world_map_confirmed():
-    # World map
-    df_world_map = df[df['date'] == df['date'].iloc[-1]].groupby('Country/Region').agg({'Confirmed': 'sum',
-                                                                                'Longitude': 'mean',
-                                                                                'Latitude': 'mean',
-                                                                                'Country/Region': 'first'})
-    # Manually change some country centroids which are mislocated due to far off colonies
-    df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Latitude'] = 39.810489
-    df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Longitude'] = -98.555759
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Latitude'] = 46.2276
-    df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Longitude'] = -3.4360
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Latitude'] = 55.3781
-    df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Longitude'] = 2.2137
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Latitude'] = 56.2639
-    df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Longitude'] = 9.5018
-
-    return dcc.Graph(
-        id='world_map_confirmed',
-        figure={
-            'data': [
-                go.Scattergeo(
-                    lon = df_world_map['Longitude'],
-                    lat = df_world_map['Latitude'],
-                    text = df_world_map['Country/Region'] + ': ' + df_world_map['Confirmed'].astype(str) + ' cases',
-                    mode = 'markers',
-                    marker_size = np.sqrt(df_world_map['Confirmed'] / 5),
-            #         marker_size = 100 * df_world_map['Confirmed'] / df_world_map['Confirmed'].max(),
-                    marker = dict(reversescale = False,
-                                autocolorscale = False,
-                                symbol = 'circle',
-                                line = dict(width=1, color='rgba(102, 102, 102)'),
-                                colorscale = 'Reds',
-                                cmin = 0,
-                                color = df_world_map['Confirmed'],
-                                cmax = df_world_map['Confirmed'].max(),
-                                colorbar_title="Confirmed Cases"),
-                    fillcolor=colors['background'])
-            ],
-            'layout': go.Layout(
-                title = 'Number of cumulative confirmed cases by country',
-                geo=dict(scope='world',
-                        projection_type="natural earth",
-                        showland = True,
-                        landcolor = "rgb(100, 125, 100)",
-                        showocean = True,
-                        oceancolor = "rgb(150, 150, 250)",
-                        showcountries=True,
-                        showlakes=False),
-                font=dict(color=colors['text']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background']
-            )
-        }
-    )
 
 @app.callback(
     Output('world_map_active', 'figure'),
@@ -660,11 +602,18 @@ def world_map_active(view, date_index):
 
     # World map
     date = df['date'].unique()[date_index]
-    # date = df['date'].iloc[-1]
-    df_world_map = df[df['date'] == date].groupby('Country/Region').agg({'Active': 'sum',
-                                                                                'Longitude': 'mean',
-                                                                                'Latitude': 'mean',
-                                                                                'Country/Region': 'first'})
+
+    df_world_map = df[df['date'] == date].groupby('Country/Region').agg({'Confirmed': 'sum',
+                                                                        'Longitude': 'mean',
+                                                                        'Latitude': 'mean',
+                                                                        'Country/Region': 'first'})
+
+    df_world_map['share_of_last_week'] = ((df[df['date'] == df['date'].unique()[-1]].groupby('Country/Region')['Confirmed'].sum() -
+                                df[df['date'] == df['date'].unique()[-7]].groupby('Country/Region')['Confirmed'].sum()) /
+                                df[df['date'] == df['date'].unique()[-1]].groupby('Country/Region')['Confirmed'].sum()) * 100
+
+    df_world_map['percentage'] = df_world_map['share_of_last_week'].fillna(0).apply(lambda x: '{:.0f}'.format(x)).fillna(0)
+
     # Manually change some country centroids which are mislocated due to far off colonies
     df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Latitude'] = 39.810489
     df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Longitude'] = -98.555759
@@ -686,23 +635,25 @@ def world_map_active(view, date_index):
                 go.Scattergeo(
                     lon = df_world_map['Longitude'],
                     lat = df_world_map['Latitude'],
-                    text = df_world_map['Country/Region'] + ': ' + df_world_map['Active'].astype(str) + ' cases',
+                    text = df_world_map['Country/Region'] + ': ' +\
+                         df_world_map['Confirmed'].astype(str) +\
+                         ' total cases, ' + df_world_map['percentage'] +\
+                         '% from previous week',
                     mode = 'markers',
-                    marker_size = np.sqrt(df_world_map['Active'] / 5),
-            #         marker_size = 100 * df_world_map['Active'] / df_world_map['Active'].max(),
+                    marker_size = np.sqrt(df_world_map['Confirmed'] / 5),
                     marker = dict(reversescale = False,
                                 autocolorscale = False,
                                 symbol = 'circle',
                                 line = dict(width=1, color='rgba(102, 102, 102)'),
                                 colorscale = 'Reds',
                                 cmin = 0,
-                                color = df_world_map['Active'],
-                                cmax = df_world_map['Active'].max(),
-                                colorbar_title="Active Cases")
+                                color = df_world_map['share_of_last_week'],
+                                cmax = df_world_map['share_of_last_week'].max(),
+                                colorbar_title="Percentage")
                     )
             ],
             'layout': go.Layout(
-                title ='Active Cases by Geography',
+                title ='Number of cumulative confirmed cases (size of marker)<br>and share of new cases from the previous week (color)',
                 geo=dict(scope=scope,
                         projection_type=projection_type,
                         showland = True,
@@ -853,4 +804,4 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
