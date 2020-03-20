@@ -20,7 +20,7 @@ cufflinks.go_offline(connected=True)
 init_notebook_mode(connected=True)
 
 
-app = dash.Dash()
+app = dash.Dash(__name__)
 server = app.server
 app.config.suppress_callback_exceptions=True
 app.title = 'COVID-19'
@@ -254,8 +254,6 @@ colors = {
     'grid': '#333333',
     'red': '#BF0000'
 }
-
-font = 'Tahoma'
 
 available_countries = sorted(data['Country/Region'].unique())
 
@@ -691,15 +689,13 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.H1(children='COVID-19',
         style={
             'textAlign': 'center',
-            'color': colors['text'],
-            'fontFamily': font
+            'color': colors['text']
             }
         ),
 
     html.Div(children='Select focus for the dashboard', style={
         'textAlign': 'center',
-        'color': colors['text'],
-            'fontFamily': font
+        'color': colors['text']
         }),
 
     html.Div(
@@ -712,8 +708,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 'color': colors['text'],
                 'width': '100%',
                 'float': 'center',
-                'display': 'inline-block',
-                'fontFamily': font
+                'display': 'inline-block'
             }
         ),
 
@@ -778,8 +773,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                             'color': colors['text'],
                             'width': '100%',
                             'float': 'center',
-                            'display': 'inline-block',
-                            'fontFamily': font
+                            'display': 'inline-block'
                             }),
                     style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
             ],
@@ -800,8 +794,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 item in data['date']])))},
             step=None)],
         style={'width': '50%',
-            'display': 'inline-block',
-            'fontFamily': 'Tahoma'}
+            'display': 'inline-block'}
         ),
 
     html.Div([
@@ -813,8 +806,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 )
             ], style={'width': '50%',
                 'float': 'right',
-                'display': 'inline-block',
-                'fontFamily': 'Tahoma'}),
+                'display': 'inline-block'}),
 
     html.Div(
         dcc.Markdown('''
@@ -826,8 +818,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 'color': '#FEFEFE',
                 'width': '100%',
                 'float': 'center',
-                'display': 'inline-block',
-                'fontFamily': font}
+                'display': 'inline-block'}
             )
         ])
 
