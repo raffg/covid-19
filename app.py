@@ -651,21 +651,23 @@ def world_map_active(view, date_index):
                     hoverinfo = 'text',
                     mode = 'markers',
                     # marker_size = np.sqrt(df_world_map['Confirmed'] / 5),
+                    # line = dict(cauto = False),
+                    # fillcolor = 'rgba(0, 0, 0)',
                     marker = dict(reversescale = False,
-                                autocolorscale = False,
-                                symbol = 'circle',
-                                size = np.sqrt(df_world_map['Confirmed'] / 5),
-                                sizeref = 1,
-                                sizemin = 0,
-                                line = dict(width=1, color='rgba(102, 102, 102)'),
-                                colorscale = 'Reds',
-                                cmin = 0,
-                                color = df_world_map['share_of_last_week'],
-                                cmax = 100,
-                                colorbar = dict(
-                                    title = "Percentage of<br>cases occurring in<br>the previous week",
-                                    thickness = 30)
-                                )
+                        autocolorscale = False,
+                        symbol = 'circle',
+                        size = np.sqrt(df_world_map['Confirmed'] / 5),
+                        sizeref = 1,
+                        sizemin = 0,
+                        line = dict(width=.5, color='rgba(0, 0, 0)'),
+                        colorscale = 'Reds',
+                        cmin = 0,
+                        color = df_world_map['share_of_last_week'],
+                        cmax = 100,
+                        colorbar = dict(
+                            title = "Percentage of<br>cases occurring in<br>the previous week",
+                            thickness = 30)
+                        )
                     )
             ],
             'layout': go.Layout(
