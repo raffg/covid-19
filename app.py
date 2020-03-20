@@ -645,9 +645,9 @@ def world_map_active(view, date_index):
                     lon = df_world_map['Longitude'],
                     lat = df_world_map['Latitude'],
                     text = df_world_map['Country/Region'] + ': ' +\
-                         df_world_map['Confirmed'].astype(str) +\
-                         ' total cases, ' + df_world_map['percentage'] +\
-                         '% from previous week',
+                        ['{:,}'.format(i) for i in df_world_map['Confirmed']] +\
+                        ' total cases, ' + df_world_map['percentage'] +\
+                        '% from previous week',
                     hoverinfo = 'text',
                     mode = 'markers',
                     # marker_size = np.sqrt(df_world_map['Confirmed'] / 5),
