@@ -676,7 +676,7 @@ def world_map_active(view, date_index):
                         showocean = True,
                         oceancolor = "rgb(80, 150, 250)",
                         showcountries=True,
-                        showlakes=False),
+                        showlakes=True),
                 font=dict(color=colors['text']),
                 paper_bgcolor=colors['background'],
                 plot_bgcolor=colors['background']
