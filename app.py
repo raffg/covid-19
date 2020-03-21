@@ -633,6 +633,9 @@ def world_map_active(view, date_index):
     df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Latitude'] = 52.1326
     df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Longitude'] = 5.2913
 
+    df_world_map.loc[df_world_map['Country/Region'] == 'Canada', 'Latitude'] = 59.050000
+    df_world_map.loc[df_world_map['Country/Region'] == 'Canada', 'Longitude'] = -112.833333
+
     return {
             'data': [
                 go.Scattergeo(
