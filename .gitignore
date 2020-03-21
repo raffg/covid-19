@@ -148,3 +148,6 @@ COVID-19/
 
 # macOS Files
 .DS_Store
+
+# auto-update files
+*.bat
