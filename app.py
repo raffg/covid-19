@@ -615,7 +615,7 @@ def world_map_active(view, date_index):
                                 df[df['date'] == df['date'].unique()[idx7]].groupby('Country/Region')['Confirmed'].sum()) /
                                 df[df['date'] == date].groupby('Country/Region')['Confirmed'].sum()) * 100
 
-    df_world_map['percentage'] = df_world_map['share_of_last_week'].fillna(0).apply(lambda x: '{:.0f}'.format(x))
+    df_world_map['percentage'] = df_world_map['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
 
     # Manually change some country centroids which are mislocated due to far off colonies
     df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Latitude'] = 39.810489
