@@ -559,16 +559,12 @@ def stacked_active(view, column):
                 y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
                 name=region,
                 hoverinfo='x+y+z+text+name',
-                stackgroup='one'))
+                stackgroup='one',
+                mode='none'))
     return {
             'data': traces,
             'layout': go.Layout(
                 title="{} {} Cases<br>(Regions with greater than {} confirmed cases)".format(view, column, scope),
-                # annotations=[dict(x=1,
-                #                 y=1,
-                #                 text = 'Regions with greater than {} confirmed cases'.format(scope),
-                #                 showarrow=False,
-                #                 xanchor='center')],
                 xaxis_title="Date",
                 yaxis_title="Number of Individuals",
                 font=dict(color=colors['text']),
