@@ -647,9 +647,6 @@ def world_map_active(view, date_index):
                         '% from previous week',
                     hoverinfo = 'text',
                     mode = 'markers',
-                    # marker_size = np.sqrt(df_world_map['Confirmed'] / 5),
-                    # line = dict(cauto = False),
-                    # fillcolor = 'rgba(0, 0, 0)',
                     marker = dict(reversescale = False,
                         autocolorscale = False,
                         symbol = 'circle',
@@ -807,6 +804,15 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                 'float': 'right',
                 'display': 'inline-block'}),
 
+    html.Div(
+        dcc.Markdown(' '),
+        style={
+            'textAlign': 'center',
+            'color': '#FEFEFE',
+            'width': '100%',
+            'float': 'center',
+            'display': 'inline-block'}),
+    
     html.Div(
         dcc.Markdown('''
             Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
