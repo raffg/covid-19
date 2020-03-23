@@ -9,7 +9,7 @@ A web dashboard deployed on Heroku at [https://covid-19-raffg.herokuapp.com/](ht
 
  The dashboard can be set on the pandemic globally, or with a focus on either the United States or Europe through the radio buttons on the top:
 
- ![focus](images/focus_select.png).
+ ![focus](images/focus_select.png)
 
  This button changes the underlying data for each displayed chart to reflect the selected region.
 
@@ -29,13 +29,13 @@ There are four indicators, each consisting of the current value for the indicato
 - **Currently active** measures only the cases active today.  
 It is calculated as `ACTIVE = CONFIRMED - DEATHS - RECOVERED`
 - **DEATHS TO DATE** measures the running total of all COVID-19-related deaths
-- **RECOVERED CASES** is the number of cases in which the patient is deemed to have recovered from the illness and is no longer infected nor contageous.
+- **RECOVERED CASES** is the number of cases in which the patient is deemed to have recovered from the illness and is no longer infected nor contagious.
 
 ### Infections
 
 ![infections](images/infections.png)
 
-The infections chart displays the totals for `CONFIRMED`, `ACTIVE`, `RECOVERED`, and `DEATHS` for the selected region, by date. Hovering the mouse over the chart will reveal the counts for each of these measures on the specific date. Using the mouse, you can zoom in and out or click and drag to select a box to zoom in on. Additionally, hovering over the chart (or any chart on the dashboard) will make visibile several control buttons in the top right of the chart. There are slightly different options for each chart, but of particular usefullness is the ability to reset the chart back to original zoom level.
+The infections chart displays the totals for `CONFIRMED`, `ACTIVE`, `RECOVERED`, and `DEATHS` for the selected region, by date. Hovering the mouse over the chart will reveal the counts for each of these measures on the specific date. Using the mouse, you can zoom in and out or click and drag to select a box to zoom in on. Additionally, hovering over the chart (or any chart on the dashboard) will make visibile several control buttons in the top right of the chart. There are slightly different options for each chart, but of particular usefulness is the ability to reset the chart back to original zoom level.
 
 ### Cases by Sub-Region
 
