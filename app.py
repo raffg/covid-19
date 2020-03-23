@@ -446,12 +446,12 @@ def worldwide_trend(view):
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Confirmed'].sum(),
-                    name="Total Confirmed",
+                    name="Confirmed",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Active'].sum(),
-                    name="Active Cases",
+                    name="Active",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
@@ -558,7 +558,7 @@ def stacked_active(view, column):
                 x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
                 y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
                 name=region,
-                hoverinfo='x+y+z+text+name',
+                hoverinfo='x+y+name',
                 stackgroup='one',
                 mode='none'))
     return {
