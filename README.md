@@ -26,7 +26,7 @@ There are five main components of the dashboard: the indicators, the infections 
 There are four indicators, each consisting of the current value for the indicator, in red, and a percent change from yesterday, in green.
 
 - **CUMULATIVE CONFIRMED** is the running total of all cases tested and confirmed in the selected region.
-- **Currently active** measures only the cases active today.  
+- **CURRENTLY ACTIVE** measures only the cases active today.  
 It is calculated as `ACTIVE = CONFIRMED - DEATHS - RECOVERED`
 - **DEATHS TO DATE** measures the running total of all COVID-19-related deaths
 - **RECOVERED CASES** is the number of cases in which the patient is deemed to have recovered from the illness and is no longer infected nor contagious.
