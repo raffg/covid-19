@@ -28,7 +28,7 @@ def etl(source='web'):
         file_date = date(2020, 1, 22)
         dates = []
 
-        while file_date <= date.today():
+        while file_date < date.today():
             dates.append(file_date)
             file_date += timedelta(days=1)
             
