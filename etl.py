@@ -28,7 +28,7 @@ def etl(source='web'):
         file_date = date(2020, 1, 22)
         dates = []
 
-        while file_date < date.today():
+        while file_date <= date.today():
             dates.append(file_date)
             file_date += timedelta(days=1)
             
@@ -42,6 +42,10 @@ def etl(source='web'):
             if b'404: Not Found\n' not in raw_string:
                 df.to_csv('data/{}.csv'.format(file), index=False)
             df['date'] = pd.to_datetime(file)
+            df.rename(columns={'Province_State': 'Province/State',
+                            'Country_Region': 'Country/Region',
+                            'Lat': 'Latitude',
+                            'Long_': 'Longitude'}, inplace=True)
             files.append(df)
 
     df = pd.concat(files, axis=0, ignore_index=True, sort=False)

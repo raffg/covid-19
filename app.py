@@ -255,7 +255,7 @@ colors = {
     'red': '#BF0000'
 }
 
-available_countries = sorted(data[data['date'] <= data['date'].unique()[-2]]['Country/Region'].unique())
+available_countries = sorted(data['Country/Region'].unique())
 
 states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
     'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
