@@ -38,6 +38,10 @@ def etl(source='web'):
             print(file)
             df = pd.read_csv(filename, index_col=None, header=0)
             df['date'] = pd.to_datetime(file)
+            df.rename(columns={'Province_State': 'Province/State',
+                               'Country_Region': 'Country/Region',
+                               'Lat': 'Latitude',
+                               'Long_': 'Longitude'}, inplace=True)
             files.append(df)
 
     elif source=='web':
