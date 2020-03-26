@@ -647,6 +647,7 @@ def world_map_active(view, date_index):
         df_world_map['Country/Region'] = df_world_map['Province/State']
 
     df_world_map = df_world_map[df_world_map['Country/Region'] != 'Cruise Ship']
+    df_world_map = df_world_map[df_world_map['Country/Region'] != 'Diamond Princess']
 
     return {
             'data': [
@@ -662,8 +663,8 @@ def world_map_active(view, date_index):
                     marker = dict(reversescale = False,
                         autocolorscale = False,
                         symbol = 'circle',
-                        size = np.sqrt(df_world_map['Confirmed'] / 5),
-                        sizeref = 1,
+                        size = np.sqrt(df_world_map['Confirmed']),
+                        sizeref = 5,
                         sizemin = 0,
                         line = dict(width=.5, color='rgba(0, 0, 0)'),
                         colorscale = 'Reds',
