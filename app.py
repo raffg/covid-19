@@ -567,6 +567,15 @@ def stacked_active(view, column):
                 hoverinfo='x+y+name',
                 stackgroup='one',
                 mode='none'))
+    if column == 'Recovered':
+        traces.append(go.Scatter(
+            x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
+            y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
+            name='Unidentified State',
+            hoverinfo='x+y+name',
+            stackgroup='one',
+            mode='none'))
+        
     return {
             'data': traces,
             'layout': go.Layout(
