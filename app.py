@@ -601,9 +601,126 @@ def world_map_active(view, date_index):
         scope='world'
         projection_type='natural earth'
     elif view == 'United States':
-        df = df_us
         scope='usa'
         projection_type='albers usa'
+        if date_index < 60 :
+            df = df_us
+        else:
+            # County-level data has been added
+            date = pd.to_datetime(data['date'].unique()[date_index]).strftime('%m-%d-%Y')
+            week = pd.to_datetime(date) - timedelta(7)
+            df = pd.read_csv('data/{}.csv'.format(date))
+            df = df[df['Country_Region'] == 'US'].groupby('Combined_Key').agg({'Confirmed': 'sum',
+                                                                        'Long_': 'first',
+                                                                        'Lat': 'first',
+                                                                        'Province_State': 'first',
+                                                                        'Admin2': 'first'})
+            df_week = pd.read_csv('data/{}.csv'.format(week.strftime('%m-%d-%Y')))
+            
+            if date_index <= 66:
+                # Need to display share of prior week from state-level
+                df_week = df_week[df_week['Country/Region'] == 'US'].groupby('Province/State')['Confirmed'].sum()
+                df = df.merge(df_week, left_on='Province_State', right_on='Province/State')
+                df = df.rename(columns={'Confirmed_x': 'Confirmed'})
+                df = df.join(df.groupby('Province_State').agg({'Confirmed': 'sum', 'Confirmed_y': 'first'}), on='Province_State', rsuffix='_r')
+                df['share_of_last_week'] = 100 * (df['Confirmed_r'] - df['Confirmed_y']) / df['Confirmed_r']
+                df['percentage'] = df['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+                df.dropna(inplace=True)
+                return {
+                        'data': [
+                            go.Scattergeo(
+                                lon = df['Long_'],
+                                lat = df['Lat'],
+                                text = df['Admin2'] + ' County, ' + df['Province_State'] + ': ' +\
+                                        ['{:,}'.format(i) for i in df['Confirmed']] +\
+                                        ' total cases, ' + df['percentage'] +\
+                                        '% from previous week',
+                                hoverinfo = 'text',
+                                mode = 'markers',
+                                marker = dict(reversescale = False,
+                                    autocolorscale = False,
+                                    symbol = 'circle',
+                                    size = np.sqrt(df['Confirmed']),
+                                    sizeref = 4,
+                                    sizemin = 0,
+                                    line = dict(width=.5, color='rgba(0, 0, 0)'),
+                                    colorscale = 'Reds',
+                                    cmin = 0,
+                                    color = df['share_of_last_week'],
+                                    cmax = 100,
+                                    colorbar = dict(
+                                        title = "Percentage of<br>cases occurring in<br>the previous week",
+                                        thickness = 30)
+                                    )
+                                )
+                        ],
+                        'layout': go.Layout(
+                            title ='Number of cumulative confirmed cases (size of marker)<br>and share of new cases from the previous week (color)',
+                            geo=dict(scope=scope,
+                                    projection_type=projection_type,
+                                    showland = True,
+                                    landcolor = "rgb(100, 125, 100)",
+                                    showocean = True,
+                                    oceancolor = "rgb(80, 150, 250)",
+                                    showcountries=True,
+                                    showlakes=True),
+                            font=dict(color=colors['text']),
+                            paper_bgcolor=colors['background'],
+                            plot_bgcolor=colors['background']
+                        )
+                    }
+            else:
+                # Share of prior week can be county-level
+                df_week = df_week[df_week['Country_Region'] == 'US'].groupby('Province_State')['Confirmed'].sum()
+                df = df.merge(df_week, left_on='Province_State', right_on='Province_State')
+                df = df.rename(columns={'Confirmed_x': 'Confirmed'})
+                df = df.join(df.groupby('Province_State').agg({'Confirmed': 'sum', 'Confirmed_y': 'first'}), on='Province_State', rsuffix='_r')
+                df['share_of_last_week'] = 100 * (df['Confirmed_r'] - df['Confirmed_y']) / df['Confirmed_r']
+                df['percentage'] = df['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+                df.dropna(inplace=True)
+                return {
+                        'data': [
+                            go.Scattergeo(
+                                lon = df['Long_'],
+                                lat = df['Lat'],
+                                text = df['Admin2'] + ' County, ' + df['Province_State'] + ': ' +\
+                                        ['{:,}'.format(i) for i in df['Confirmed']] +\
+                                        ' total cases, ' + df['percentage'] +\
+                                        '% from previous week',
+                                hoverinfo = 'text',
+                                mode = 'markers',
+                                marker = dict(reversescale = False,
+                                    autocolorscale = False,
+                                    symbol = 'circle',
+                                    size = np.sqrt(df['Confirmed']),
+                                    sizeref = 4,
+                                    sizemin = 0,
+                                    line = dict(width=.5, color='rgba(0, 0, 0)'),
+                                    colorscale = 'Reds',
+                                    cmin = 0,
+                                    color = df['share_of_last_week'],
+                                    cmax = 100,
+                                    colorbar = dict(
+                                        title = "Percentage of<br>cases occurring in<br>the previous week",
+                                        thickness = 30)
+                                    )
+                                )
+                        ],
+                        'layout': go.Layout(
+                            title ='Number of cumulative confirmed cases (size of marker)<br>and share of new cases from the previous week (color)',
+                            geo=dict(scope=scope,
+                                    projection_type=projection_type,
+                                    showland = True,
+                                    landcolor = "rgb(100, 125, 100)",
+                                    showocean = True,
+                                    oceancolor = "rgb(80, 150, 250)",
+                                    showcountries=True,
+                                    showlakes=True),
+                            font=dict(color=colors['text']),
+                            paper_bgcolor=colors['background'],
+                            plot_bgcolor=colors['background']
+                        )
+                    }
     elif view == 'Europe':
         df = df_eu
         scope='europe'
