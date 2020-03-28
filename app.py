@@ -464,10 +464,6 @@ def world_map_active(view, date_index):
     df_world_map.loc[df_world_map['Country/Region'] == 'Canada', 'Latitude'] = 59.050000
     df_world_map.loc[df_world_map['Country/Region'] == 'Canada', 'Longitude'] = -112.833333
 
-    if pd.to_datetime(date).strftime('%Y-%m-%d') > '2020-03-22' and view == 'United States':
-        df_world_map = df_world_map[['Confirmed', 'share_of_last_week', 'percentage']].merge(geo_us, left_on='Country/Region', right_on='Province/State')
-        df_world_map['Country/Region'] = df_world_map['Province/State']
-
     df_world_map = df_world_map[df_world_map['Country/Region'] != 'Cruise Ship']
     df_world_map = df_world_map[df_world_map['Country/Region'] != 'Diamond Princess']
 
