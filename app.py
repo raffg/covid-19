@@ -270,7 +270,7 @@ states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
     'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
     'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
     'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'Recovered']
+    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
 
 eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
     'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
@@ -281,20 +281,8 @@ eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzego
 
 region_options = {'Worldwide': available_countries, 'United States': states, 'Europe': eu}
 
-df_us = data[data['Province/State'].isin(states)]
-df_eu = data[data['Country/Region'].isin(eu)]
-df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
-                          'Country/Region': ['France', 'France'],
-                          'Province/State': [np.nan, np.nan],
-                          'Confirmed': [0, 0],
-                          'Deaths': [0, 0],
-                          'Recovered': [0, 0],
-                          'Latitude': [np.nan, np.nan],
-                          'Longitude': [np.nan, np.nan],
-                          'Active': [0, 0]})).sort_index()
-
-df_us.drop('Country/Region', axis=1, inplace=True)
-df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
+df_us = pd.read_csv('df_us.csv')
+df_eu = pd.read_csv('df_eu.csv')
 
 @app.callback(
     Output('confirmed_ind', 'figure'),

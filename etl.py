@@ -233,122 +233,94 @@ def etl(source='web'):
     df['Longitude'] = df['Longitude'].fillna(df.groupby('Province/State')['Longitude'].transform('mean'))
     return df
 
-def views(df, states, eu):
-    df_us = df[df['Province/State'].isin(states)]
-    df_eu = df[df['Country/Region'].isin(eu)]
-    df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
-                          'Country/Region': ['France', 'France'],
-                          'Province/State': [np.nan, np.nan],
-                          'Confirmed': [0, 0],
-                          'Deaths': [0, 0],
-                          'Recovered': [0, 0],
-                          'Latitude': [np.nan, np.nan],
-                          'Longitude': [np.nan, np.nan],
-                          'Active': [0, 0]})).sort_index()
-
+def us(data):
+    states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+        'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
+        'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
+        'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+        'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
+        'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+        'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+        'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'Recovered']
+    df_us = data[data['Province/State'].isin(states)]
     df_us.drop('Country/Region', axis=1, inplace=True)
     df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
+    return df_us
 
-    return df_us, df_eu
+def eu(data):
+    eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
+        'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
+        'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Kosovo', 'Latvia', 'Liechtenstein',
+        'Lithuania', 'Luxembourg', 'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands', 'North Macedonia', 'Norway',
+        'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+        'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
+    df_eu = data[data['Country/Region'].isin(eu)]
+    df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
+                            'Country/Region': ['France', 'France'],
+                            'Province/State': [np.nan, np.nan],
+                            'Confirmed': [0, 0],
+                            'Deaths': [0, 0],
+                            'Recovered': [0, 0],
+                            'Latitude': [np.nan, np.nan],
+                            'Longitude': [np.nan, np.nan],
+                            'Active': [0, 0]})).sort_index()
+    return df_eu
 
-def indicators(df, column):
-    value = df[df['date'] == df['date'].iloc[-1]][column].sum()
-    delta = df[df['date'] == df['date'].unique()[-2]][column].sum()
+def us_county():
+    path = 'data'
+    all_files = glob.glob(path + "/*.csv")
 
-    return value, delta
+    files = []
 
-def infections(data):
-    df = pd.DataFrame()
-    df['x'] = data.groupby('date')['date'].first()
-    df['Confirmed'] = data.groupby('date')['Confirmed'].sum()
-    df['Active'] = data.groupby('date')['Active'].sum()
-    df['Recovered'] = data.groupby('date')['Recovered'].sum()
-    df['Deaths'] = data.groupby('date')['Deaths'].sum()
+    process = False
+    for filename in all_files:
+        file = re.search(r'([0-9]{2}\-[0-9]{2}\-[0-9]{4})', filename)[0]
+        if file == '03-22-2020':
+            process = True
+        if process:
+            print(file)
+            df = pd.read_csv(filename, index_col=None, header=0)
+            df['date'] = pd.to_datetime(file)
+            files.append(df)
+    df = df[df['Country_Region'] == 'US']
+    df['key'] = df['Admin2'] + ' County, ' + df['Province_State']
+
+    # Fill missing values as 0; create Active cases column
+    df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
+    df['Deaths'] = df['Deaths'].fillna(0).astype(int)
+    df['Recovered'] = df['Recovered'].fillna(0).astype(int)
+    df['Active'] = df['Confirmed'] - df['Deaths'] - df['Recovered']
+
+    df = df[['date',
+            'key',
+            'Confirmed',
+            'Deaths',
+            'Recovered',
+            'Active',
+            'Latitude',
+            'Longitude']]
+
+    if
+        # Need to display share of prior week from state-level
+        df_week = df_week[df_week['Country/Region'] == 'US'].groupby('Province/State')['Confirmed'].sum()
+        df = df.merge(df_week, left_on='Province_State', right_on='Province/State')
+        df = df.rename(columns={'Confirmed_x': 'Confirmed'})
+        df = df.join(df.groupby('Province_State').agg({'Confirmed': 'sum', 'Confirmed_y': 'first'}), on='Province_State', rsuffix='_r')
+        df['share_of_last_week'] = 100 * (df['Confirmed_r'] - df['Confirmed_y']) / df['Confirmed_r']
+        df['percentage'] = df['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+        df.dropna(inplace=True)
+
     return df
-
-def active_countries(data, regions):
-    df = pd.DataFrame()
-    for region in regions:
-        df['x_{}'.format(region)] = data[data['Country/Region'] == region].groupby('date')['date'].first()
-        df['y_{}'.format(region)] = data[data['Country/Region'] == region].groupby('date')['Active'].sum()
-    return df
-
-def stacked(data, regions, scope):
-    df = pd.DataFrame()
-    for region in regions:
-        if data[(data['date'] == data['date'].iloc[-1]) & (data['Country/Region'] == region)]['Confirmed'].sum() > scope:
-            df['x_{}'.format(region)] = data[data['Country/Region'] == region].groupby('date')['date'].first()
-            for column in ['Confirmed', 'Active', 'Recovered', 'Deaths']:
-                df['y_{}_{}'.format(region, column)] = data[data['Country/Region'] == region].groupby('date')[column].sum()
-    return df
-
-def map_data(data):
-    df_world_map = pd.DataFrame()
-
-    for date_index in range(len(df['date'].unique())):
-        date = df['date'].unique()[date_index]
-
-        df_world_map = data[data['date'] == date].groupby('Country/Region').agg({'Active': 'sum',
-                                                                                'Longitude': 'mean',
-                                                                                'Latitude': 'mean',
-                                                                                'Country/Region': 'first'})
-        # Manually change some country centroids which are mislocated due to far off colonies
-        df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Latitude'] = 39.810489
-        df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Longitude'] = -98.555759
-
-        df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Latitude'] = 46.2276
-        df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Longitude'] = -3.4360
-
-        df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Latitude'] = 55.3781
-        df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Longitude'] = 2.2137
-
-        df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Latitude'] = 56.2639
-        df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Longitude'] = 9.5018
-
-        df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Latitude'] = 52.1326
-        df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Longitude'] = 5.2913
-    
-    return df_world_map
 
 if __name__ == '__main__':
-    df = etl()
-    df.to_csv('dashboard_data.csv', index=False)
+    data = etl()
+    data.to_csv('dashboard_data.csv', index=False)
 
-    # available_countries = sorted(df['Country/Region'].unique())
+    df_us = us(data)
+    df_us.to_csv('df_us.csv', index=False)
 
-    # states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-    #     'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
-    #     'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
-    #     'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-    #     'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-    #     'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-    #     'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    #     'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+    df_eu = eu(data)
+    df_eu.to_csv('df_eu.csv', index=False)
 
-    # eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
-    #     'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
-    #     'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Kosovo', 'Latvia', 'Liechtenstein',
-    #     'Lithuania', 'Luxembourg', 'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands', 'North Macedonia', 'Norway',
-    #     'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-    #     'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
-
-    # df_us, df_eu = views(df, states, eu)
-
-    # value_ww_confirmed, delta_ww_confirmed = indicators(df, 'Confirmed')
-    # value_ww_active, delta_ww_active = indicators(df, 'Active')
-    # value_ww_recovered, delta_ww_recovered = indicators(df, 'Recovered')
-    # value_ww_deaths, delta_ww_deaths = indicators(df, 'Deaths')
-
-    # df_worldwide_infections = infections(df)
-    # df_us_infections = infections(df_us)
-    # df_eu_infections = infections(df_eu)
-
-    # df_ww_active = active_countries(df, available_countries)
-    # df_us_active = active_countries(df_us, states)
-    # df_eu_active = active_countries(df_eu, eu)
-
-    # df_ww_stacked = stacked(df, available_countries, 1000)
-    # df_us_stacked = stacked(df_us, states, 20)
-    # df_eu_stacked = stacked(df_eu, states, 1000)
-
-    # df_world_map_ww = 
+    df_us_county = us_county()
+    df_us_county.to_csv('df_us_county.csv', index=False)
