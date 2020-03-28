@@ -349,6 +349,12 @@ def us_county():
     # Add in all data prior to county availability
     df2 = pd.read_csv('dashboard_data.csv')
     df2 = df2[(df2['date'] < '2020-03-22') & (df2['Country/Region'] == 'US')]
+    df2 = df2.groupby(['date', 'Province/State'], as_index=False).agg({'Country/Region': 'first',
+                                                             'Confirmed': 'sum',
+                                                             'Deaths': 'sum',
+                                                             'Recovered': 'sum',
+                                                             'Active': 'sum'})
+    df2 = df2.merge(pd.read_csv('geo_us.csv'), left_on='Province/State', right_on='Province/State')
     df2 = df2.merge(df2.groupby(['date', 'Province/State'], as_index=False).agg({'Confirmed': 'sum'}),
                 on=['date', 'Province/State'])
     df2['prev_value'] = df2.groupby(['Province/State'])['Confirmed_y'].shift(7, fill_value=0)
