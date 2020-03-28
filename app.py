@@ -25,229 +25,6 @@ server = app.server
 app.config.suppress_callback_exceptions=True
 app.title = 'COVID-19'
 
-def etl(source='web'):
-    if source=='folder':
-        # Load files from folder
-        path = 'data'
-        all_files = glob.glob(path + "/*.csv")
-
-        files = []
-
-        for filename in all_files:
-            file = re.search(r'([0-9]{2}\-[0-9]{2}\-[0-9]{4})', filename)[0]
-            print(file)
-            df = pd.read_csv(filename, index_col=None, header=0)
-            df['date'] = pd.to_datetime(file)
-            df.rename(columns={'Province_State': 'Province/State',
-                               'Country_Region': 'Country/Region',
-                               'Lat': 'Latitude',
-                               'Long_': 'Longitude'}, inplace=True)
-            files.append(df)
-
-    elif source=='web':
-        # Load files from web
-        file_date = date(2020, 1, 22)
-        dates = []
-
-        while file_date <= date.today():
-            dates.append(file_date)
-            file_date += timedelta(days=1)
-            
-        files = []
-        for file in dates:
-            file = file.strftime("%m-%d-%Y")
-            print(file)
-            url = r'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/{}.csv'.format(file)
-            raw_string = requests.get(url).content
-            df = pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
-            df['date'] = pd.to_datetime(file)
-            files.append(df)
-
-    df = pd.concat(files, axis=0, ignore_index=True, sort=False)
-
-    # Rename countries with duplicate naming conventions
-    df['Country/Region'].replace('Mainland China', 'China', inplace=True)
-    df['Country/Region'].replace('Hong Kong SAR', 'Hong Kong', inplace=True)
-    df['Country/Region'].replace(' Azerbaijan', 'Azerbaijan', inplace=True)
-    df['Country/Region'].replace('Holy See', 'Vatican City', inplace=True)
-    df['Country/Region'].replace('Iran (Islamic Republic of)', 'Iran', inplace=True)
-    df['Country/Region'].replace('Taiwan*', 'Taiwan', inplace=True)
-    df['Country/Region'].replace('Korea, South', 'South Korea', inplace=True)
-    df['Country/Region'].replace('Viet Nam', 'Vietnam', inplace=True)
-    df['Country/Region'].replace('Macao SAR', 'Macau', inplace=True)
-    df['Country/Region'].replace('Russian Federation', 'Russia', inplace=True)
-    df['Country/Region'].replace('Republic of Moldova', 'Moldova', inplace=True)
-    df['Country/Region'].replace('Czechia', 'Czech Republic', inplace=True)
-    df['Country/Region'].replace('Congo (Kinshasa)', 'Congo', inplace=True)
-    df['Country/Region'].replace('Northern Ireland', 'United Kingdom', inplace=True)
-    df['Country/Region'].replace('Republic of Korea', 'North Korea', inplace=True)
-    df['Country/Region'].replace('Congo (Brazzaville)', 'Congo', inplace=True)
-    df['Country/Region'].replace('Taipei and environs', 'Taiwan', inplace=True)
-    df['Country/Region'].replace('Others', 'Cruise Ship', inplace=True)
-    df['Province/State'].replace('Cruise Ship', 'Diamond Princess cruise ship', inplace=True)
-    df['Province/State'].replace('From Diamond Princess', 'Diamond Princess cruise ship', inplace=True)
-
-    # Replace old reporting standards
-    df['Province/State'].replace('Chicago', 'Illinois', inplace=True)
-    df['Province/State'].replace('Chicago, IL', 'Illinois', inplace=True)
-    df['Province/State'].replace('Cook County, IL', 'Illinois', inplace=True)
-    df['Province/State'].replace('Boston, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace(' Norfolk County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Suffolk County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Middlesex County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Norwell County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Plymouth County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Norfolk County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Berkshire County, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Unknown Location, MA', 'Massachusetts', inplace=True)
-    df['Province/State'].replace('Los Angeles, CA', 'California', inplace=True)
-    df['Province/State'].replace('Orange, CA', 'California', inplace=True)
-    df['Province/State'].replace('Santa Clara, CA', 'California', inplace=True)
-    df['Province/State'].replace('San Benito, CA', 'California', inplace=True)
-    df['Province/State'].replace('Humboldt County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Sacramento County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Travis, CA (From Diamond Princess)', 'California', inplace=True)
-    df['Province/State'].replace('Placer County, CA', 'California', inplace=True)
-    df['Province/State'].replace('San Mateo, CA', 'California', inplace=True)
-    df['Province/State'].replace('Sonoma County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Berkeley, CA', 'California', inplace=True)
-    df['Province/State'].replace('Orange County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Contra Costa County, CA', 'California', inplace=True)
-    df['Province/State'].replace('San Francisco County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Yolo County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Santa Clara County, CA', 'California', inplace=True)
-    df['Province/State'].replace('San Diego County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Travis, CA', 'California', inplace=True)
-    df['Province/State'].replace('Alameda County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Madera County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Santa Cruz County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Fresno County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Riverside County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Shasta County, CA', 'California', inplace=True)
-    df['Province/State'].replace('Seattle, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Snohomish County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('King County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Unassigned Location, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Clark County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Jefferson County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Pierce County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Kittitas County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Grant County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Spokane County, WA', 'Washington', inplace=True)
-    df['Province/State'].replace('Tempe, AZ', 'Arizona', inplace=True)
-    df['Province/State'].replace('Maricopa County, AZ', 'Arizona', inplace=True)
-    df['Province/State'].replace('Pinal County, AZ', 'Arizona', inplace=True)
-    df['Province/State'].replace('Madison, WI', 'Wisconsin', inplace=True)
-    df['Province/State'].replace('San Antonio, TX', 'Texas', inplace=True)
-    df['Province/State'].replace('Lackland, TX', 'Texas', inplace=True)
-    df['Province/State'].replace('Lackland, TX (From Diamond Princess)', 'Texas', inplace=True)
-    df['Province/State'].replace('Harris County, TX', 'Texas', inplace=True)
-    df['Province/State'].replace('Fort Bend County, TX', 'Texas', inplace=True)
-    df['Province/State'].replace('Montgomery County, TX', 'Texas', inplace=True)
-    df['Province/State'].replace('Collin County, TX', 'Texas', inplace=True)
-    df['Province/State'].replace('Ashland, NE', 'Nebraska', inplace=True)
-    df['Province/State'].replace('Omaha, NE (From Diamond Princess)', 'Nebraska', inplace=True)
-    df['Province/State'].replace('Douglas County, NE', 'Nebraska', inplace=True)
-    df['Province/State'].replace('Portland, OR', 'Oregon', inplace=True)
-    df['Province/State'].replace('Umatilla, OR', 'Oregon', inplace=True)
-    df['Province/State'].replace('Klamath County, OR', 'Oregon', inplace=True)
-    df['Province/State'].replace('Douglas County, OR', 'Oregon', inplace=True)
-    df['Province/State'].replace('Marion County, OR', 'Oregon', inplace=True)
-    df['Province/State'].replace('Jackson County, OR ', 'Oregon', inplace=True)
-    df['Province/State'].replace('Washington County, OR', 'Oregon', inplace=True)
-    df['Province/State'].replace('Providence, RI', 'Rhode Island', inplace=True)
-    df['Province/State'].replace('Providence County, RI', 'Rhode Island', inplace=True)
-    df['Province/State'].replace('Grafton County, NH', 'New Hampshire', inplace=True)
-    df['Province/State'].replace('Rockingham County, NH', 'New Hampshire', inplace=True)
-    df['Province/State'].replace('Hillsborough, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Sarasota, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Santa Rosa County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Broward County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Lee County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Volusia County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Manatee County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Okaloosa County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('Charlotte County, FL', 'Florida', inplace=True)
-    df['Province/State'].replace('New York City, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Westchester County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Queens County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('New York County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Nassau, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Nassau County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Rockland County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Saratoga County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Suffolk County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Ulster County, NY', 'New York', inplace=True)
-    df['Province/State'].replace('Fulton County, GA', 'Georgia', inplace=True)
-    df['Province/State'].replace('Floyd County, GA', 'Georgia', inplace=True)
-    df['Province/State'].replace('Polk County, GA', 'Georgia', inplace=True)
-    df['Province/State'].replace('Cherokee County, GA', 'Georgia', inplace=True)
-    df['Province/State'].replace('Cobb County, GA', 'Georgia', inplace=True)
-    df['Province/State'].replace('Wake County, NC', 'North Carolina', inplace=True)
-    df['Province/State'].replace('Chatham County, NC', 'North Carolina', inplace=True)
-    df['Province/State'].replace('Bergen County, NJ', 'New Jersey', inplace=True)
-    df['Province/State'].replace('Hudson County, NJ', 'New Jersey', inplace=True)
-    df['Province/State'].replace('Clark County, NV', 'Nevada', inplace=True)
-    df['Province/State'].replace('Washoe County, NV', 'Nevada', inplace=True)
-    df['Province/State'].replace('Williamson County, TN', 'Tennessee', inplace=True)
-    df['Province/State'].replace('Davidson County, TN', 'Tennessee', inplace=True)
-    df['Province/State'].replace('Shelby County, TN', 'Tennessee', inplace=True)
-    df['Province/State'].replace('Montgomery County, MD', 'Maryland', inplace=True)
-    df['Province/State'].replace('Harford County, MD', 'Maryland', inplace=True)
-    df['Province/State'].replace('Denver County, CO', 'Colorado', inplace=True)
-    df['Province/State'].replace('Summit County, CO', 'Colorado', inplace=True)
-    df['Province/State'].replace('Douglas County, CO', 'Colorado', inplace=True)
-    df['Province/State'].replace('El Paso County, CO', 'Colorado', inplace=True)
-    df['Province/State'].replace('Delaware County, PA', 'Pennsylvania', inplace=True)
-    df['Province/State'].replace('Wayne County, PA', 'Pennsylvania', inplace=True)
-    df['Province/State'].replace('Montgomery County, PA', 'Pennsylvania', inplace=True)
-    df['Province/State'].replace('Fayette County, KY', 'Kentucky', inplace=True)
-    df['Province/State'].replace('Jefferson County, KY', 'Kentucky', inplace=True)
-    df['Province/State'].replace('Harrison County, KY', 'Kentucky', inplace=True)
-    df['Province/State'].replace('Marion County, IN', 'Indiana', inplace=True)
-    df['Province/State'].replace('Hendricks County, IN', 'Indiana', inplace=True)
-    df['Province/State'].replace('Ramsey County, MN', 'Minnesota', inplace=True)
-    df['Province/State'].replace('Carver County, MN', 'Minnesota', inplace=True)
-    df['Province/State'].replace('Fairfield County, CT', 'Connecticut', inplace=True)
-    df['Province/State'].replace('Charleston County, SC', 'South Carolina', inplace=True)
-    df['Province/State'].replace('Spartanburg County, SC', 'South Carolina', inplace=True)
-    df['Province/State'].replace('Kershaw County, SC', 'South Carolina', inplace=True)
-    df['Province/State'].replace('Davis County, UT', 'Utah', inplace=True)
-    df['Province/State'].replace('Honolulu County, HI', 'Hawaii', inplace=True)
-    df['Province/State'].replace('Tulsa County, OK', 'Oklahoma', inplace=True)
-    df['Province/State'].replace('Fairfax County, VA', 'Virginia', inplace=True)
-    df['Province/State'].replace('St. Louis County, MO', 'Missouri', inplace=True)
-    df['Province/State'].replace('Unassigned Location, VT', 'Vermont', inplace=True)
-    df['Province/State'].replace('Bennington County, VT', 'Vermont', inplace=True)
-    df['Province/State'].replace('Johnson County, IA', 'Iowa', inplace=True)
-    df['Province/State'].replace('Jefferson Parish, LA', 'Louisiana', inplace=True)
-    df['Province/State'].replace('Johnson County, KS', 'Kansas', inplace=True)
-    df['Province/State'].replace('Washington, D.C.', 'District of Columbia', inplace=True)
-
-    # South Korea data on March 10 seems to be mislabled as North Korea
-    df.loc[(df['Country/Region'] == 'North Korea') & (df['date'] == '03-10-2020'), 'Country/Region'] = 'South Korea'
-
-    # Re-order the columns for readability
-    df = df[['date',
-            'Country/Region',
-            'Province/State',
-            'Confirmed',
-            'Deaths',
-            'Recovered',
-            'Latitude',
-            'Longitude']]
-
-    # Fill missing values as 0; create Active cases column
-    df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
-    df['Deaths'] = df['Deaths'].fillna(0).astype(int)
-    df['Recovered'] = df['Recovered'].fillna(0).astype(int)
-    df['Active'] = df['Confirmed'] - df['Deaths'] - df['Recovered']
-
-    # Replace missing values for latitude and longitude
-    df['Latitude'] = df['Latitude'].fillna(df.groupby('Province/State')['Latitude'].transform('mean'))
-    df['Longitude'] = df['Longitude'].fillna(df.groupby('Province/State')['Longitude'].transform('mean'))
-    return df
-
 # data = etl(source='folder')
 data = pd.read_csv('dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
@@ -270,7 +47,7 @@ states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
     'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
     'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
     'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'Recovered']
+    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
 
 eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
     'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
@@ -281,20 +58,10 @@ eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzego
 
 region_options = {'Worldwide': available_countries, 'United States': states, 'Europe': eu}
 
-df_us = data[data['Province/State'].isin(states)]
-df_eu = data[data['Country/Region'].isin(eu)]
-df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
-                          'Country/Region': ['France', 'France'],
-                          'Province/State': [np.nan, np.nan],
-                          'Confirmed': [0, 0],
-                          'Deaths': [0, 0],
-                          'Recovered': [0, 0],
-                          'Latitude': [np.nan, np.nan],
-                          'Longitude': [np.nan, np.nan],
-                          'Active': [0, 0]})).sort_index()
-
-df_us.drop('Country/Region', axis=1, inplace=True)
-df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
+df_us = pd.read_csv('df_us.csv')
+df_eu = pd.read_csv('df_eu.csv')
+df_us_counties = pd.read_csv('df_us_county.csv')
+df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
 
 @app.callback(
     Output('confirmed_ind', 'figure'),
@@ -497,7 +264,7 @@ def set_countries_value(view, available_options):
     if view == 'Worldwide':
         return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']
     elif view == 'United States':
-        return ['New York', 'Washington', 'California', 'Florida', 'Texas']
+        return ['New York', 'Washington', 'California', 'Florida', 'Michigan']
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
     else:
@@ -601,9 +368,55 @@ def world_map_active(view, date_index):
         scope='world'
         projection_type='natural earth'
     elif view == 'United States':
-        df = df_us
         scope='usa'
         projection_type='albers usa'
+        df = df_us_counties
+        date = df['date'].unique()[date_index]
+        df = df[df['date'] == date]
+
+        return {
+                'data': [
+                    go.Scattergeo(
+                        lon = df['Longitude'],
+                        lat = df['Latitude'],
+                        text = df['key'] + ': ' +\
+                                ['{:,}'.format(i) for i in df['Confirmed']] +\
+                                ' total cases, ' + df['percentage'] +\
+                                '% from previous week',
+                        hoverinfo = 'text',
+                        mode = 'markers',
+                        marker = dict(reversescale = False,
+                            autocolorscale = False,
+                            symbol = 'circle',
+                            size = np.sqrt(df['Confirmed']),
+                            sizeref = 2,
+                            sizemin = 0,
+                            line = dict(width=.5, color='rgba(0, 0, 0)'),
+                            colorscale = 'Reds',
+                            cmin = 0,
+                            color = df['share_of_last_week'],
+                            cmax = 100,
+                            colorbar = dict(
+                                title = "Percentage of<br>cases occurring in<br>the previous week",
+                                thickness = 30)
+                            )
+                        )
+                ],
+                'layout': go.Layout(
+                    title ='Number of cumulative confirmed cases (size of marker)<br>and share of new cases from the previous week (color)',
+                    geo=dict(scope=scope,
+                            projection_type=projection_type,
+                            showland = True,
+                            landcolor = "rgb(100, 125, 100)",
+                            showocean = True,
+                            oceancolor = "rgb(80, 150, 250)",
+                            showcountries=True,
+                            showlakes=True),
+                    font=dict(color=colors['text']),
+                    paper_bgcolor=colors['background'],
+                    plot_bgcolor=colors['background']
+                )
+            }
     elif view == 'Europe':
         df = df_eu
         scope='europe'
@@ -802,31 +615,32 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
     html.Div([
         dcc.Graph(id='world_map_active'),
-        dcc.Slider(
+        html.Div(dcc.Slider(
             id='date_slider',
             min=list(range(len(data['date'].unique())))[0],
             max=list(range(len(data['date'].unique())))[-1],
             value=list(range(len(data['date'].unique())))[-1],
-            marks={(idx): (date if idx%7==0 else '') for idx, date in
-                enumerate(sorted(set([item.strftime("%m-%d-%Y") for
+            marks={(idx): (date.format(u"\u2011", u"\u2011") if
+                (idx-4)%7==0 else '') for idx, date in
+                enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
                 item in data['date']])))},
             step=None,
             vertical=False,
-            updatemode='mouseup')],
+            updatemode='mouseup'), style={'width': '98%', 'float': 'left'})],
         style={'width': '50%',
             'display': 'inline-block'}
         ),
 
     html.Div([
-            dcc.Graph(id='active_countries'),
-            dcc.Dropdown(
-                id='country_select',
-                multi=True,
-                style={'width': '95%', 'float': 'center'}
-                )],
-            style={'width': '50%',
-                'float': 'right',
-                'display': 'inline-block'}),
+        dcc.Graph(id='active_countries'),
+        dcc.Dropdown(
+            id='country_select',
+            multi=True,
+            style={'width': '95%', 'float': 'center'}
+            )],
+        style={'width': '50%',
+            'float': 'right',
+            'display': 'inline-block'}),
 
     html.Div(
         dcc.Markdown(' '),
