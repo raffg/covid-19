@@ -615,31 +615,32 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
 
     html.Div([
         dcc.Graph(id='world_map_active'),
-        dcc.Slider(
+        html.Div(dcc.Slider(
             id='date_slider',
             min=list(range(len(data['date'].unique())))[0],
             max=list(range(len(data['date'].unique())))[-1],
             value=list(range(len(data['date'].unique())))[-1],
-            marks={(idx): (date if idx%7==0 else '') for idx, date in
-                enumerate(sorted(set([item.strftime("%m-%d-%Y") for
+            marks={(idx): (date.format(u"\u2011", u"\u2011") if
+                (idx-4)%7==0 else '') for idx, date in
+                enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
                 item in data['date']])))},
             step=None,
             vertical=False,
-            updatemode='mouseup')],
+            updatemode='mouseup'), style={'width': '98%', 'float': 'left'})],
         style={'width': '50%',
             'display': 'inline-block'}
         ),
 
     html.Div([
-            dcc.Graph(id='active_countries'),
-            dcc.Dropdown(
-                id='country_select',
-                multi=True,
-                style={'width': '95%', 'float': 'center'}
-                )],
-            style={'width': '50%',
-                'float': 'right',
-                'display': 'inline-block'}),
+        dcc.Graph(id='active_countries'),
+        dcc.Dropdown(
+            id='country_select',
+            multi=True,
+            style={'width': '95%', 'float': 'center'}
+            )],
+        style={'width': '50%',
+            'float': 'right',
+            'display': 'inline-block'}),
 
     html.Div(
         dcc.Markdown(' '),
