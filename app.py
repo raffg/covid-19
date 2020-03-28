@@ -25,7 +25,6 @@ server = app.server
 app.config.suppress_callback_exceptions=True
 app.title = 'COVID-19'
 
-# data = etl(source='folder')
 data = pd.read_csv('dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
 
