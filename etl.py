@@ -21,6 +21,10 @@ def etl(source='web'):
             print(file)
             df = pd.read_csv(filename, index_col=None, header=0)
             df['date'] = pd.to_datetime(file)
+            df.rename(columns={'Province_State': 'Province/State',
+                               'Country_Region': 'Country/Region',
+                               'Lat': 'Latitude',
+                               'Long_': 'Longitude'}, inplace=True)
             files.append(df)
 
     elif source=='web':
@@ -243,8 +247,8 @@ def us(data):
         'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
         'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'Recovered']
     df_us = data[data['Province/State'].isin(states)]
-    df_us.drop('Country/Region', axis=1, inplace=True)
-    df_us.rename(columns={'Province/State': 'Country/Region'}, inplace=True)
+    df_us = df_us.drop('Country/Region', axis=1)
+    df_us = df_us.rename(columns={'Province/State': 'Country/Region'})
     return df_us
 
 def eu(data):
@@ -278,11 +282,11 @@ def us_county():
         if file == '03-22-2020':
             process = True
         if process:
-            print(file)
             df = pd.read_csv(filename, index_col=None, header=0)
             df['date'] = pd.to_datetime(file)
             files.append(df)
-    df = df[df['Country_Region'] == 'US']
+    df = pd.concat(files, axis=0, ignore_index=True, sort=False)
+    df = df.loc[df['Country_Region'] == 'US']
     df['key'] = df['Admin2'] + ' County, ' + df['Province_State']
 
     # Fill missing values as 0; create Active cases column
@@ -290,25 +294,71 @@ def us_county():
     df['Deaths'] = df['Deaths'].fillna(0).astype(int)
     df['Recovered'] = df['Recovered'].fillna(0).astype(int)
     df['Active'] = df['Confirmed'] - df['Deaths'] - df['Recovered']
-
     df = df[['date',
+            'key',
+            'Province_State',
+            'Confirmed',
+            'Deaths',
+            'Recovered',
+            'Active',
+            'Lat',
+            'Long_']]
+
+    # Create two dataframes to handle share of last week before county-level data was available
+    df1 = df[df['date'] <= '2020-03-28']
+    df2 = df[df['date'] > '2020-03-28']
+
+    # Collect state-level data from the day prior
+    prev = pd.read_csv('data/03-21-2020.csv')
+    prev = prev[prev['Country/Region'] == 'US']
+
+    # Calculate share_of_last_week as the same for each county in the state, for the first week of availability
+    df1 = df1.merge(prev, left_on='Province_State', right_on='Province/State')
+    df1 = df1.rename(columns={'Confirmed_x': 'Confirmed',
+                            'Deaths_x': 'Deaths',
+                            'Recovered_x': 'Recovered'})
+    df1 = df1.join(df1.groupby('Province_State').agg({'Confirmed': 'sum', 'Confirmed_y': 'first'}),
+                on='Province_State',
+                rsuffix='_r')
+    df1['share_of_last_week'] = 100 * (df1['Confirmed_r'] - df1['Confirmed_y']) / df1['Confirmed_r']
+    df1['percentage'] = df1['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+    df1.dropna(inplace=True)
+    columns = ['date',
             'key',
             'Confirmed',
             'Deaths',
             'Recovered',
             'Active',
-            'Latitude',
-            'Longitude']]
+            'Lat',
+            'Long_',
+            'share_of_last_week',
+            'percentage']
+    df1 = df1[columns]
 
-    if
-        # Need to display share of prior week from state-level
-        df_week = df_week[df_week['Country/Region'] == 'US'].groupby('Province/State')['Confirmed'].sum()
-        df = df.merge(df_week, left_on='Province_State', right_on='Province/State')
-        df = df.rename(columns={'Confirmed_x': 'Confirmed'})
-        df = df.join(df.groupby('Province_State').agg({'Confirmed': 'sum', 'Confirmed_y': 'first'}), on='Province_State', rsuffix='_r')
-        df['share_of_last_week'] = 100 * (df['Confirmed_r'] - df['Confirmed_y']) / df['Confirmed_r']
-        df['percentage'] = df['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
-        df.dropna(inplace=True)
+    # Calculate share_of_last_week appropriately once data from previous week is available
+    df2['share_of_last_week'] = 100 * (df2['Confirmed'] - df2['Confirmed'].shift(7)) / df2['Confirmed']
+    df2['percentage'] = df2['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+    df2 = df2[columns]
+
+    # Combine the two dataframes
+    df = pd.concat([df1, df2], ignore_index=True)
+
+    df.rename(columns={'Lat': 'Latitude',
+                       'Long_': 'Longitude'}, inplace=True)
+
+    # Add in all data prior to county availability
+    df2 = pd.read_csv('dashboard_data.csv')
+    df2 = df2[(df2['date'] < '2020-03-22') & (df2['Country/Region'] == 'US')]
+    df2 = df2.merge(df2.groupby(['date', 'Province/State'], as_index=False).agg({'Confirmed': 'sum'}),
+                on=['date', 'Province/State'])
+    df2['prev_value'] = df2.groupby(['Province/State'])['Confirmed_y'].shift(7, fill_value=0)
+    df2['share_of_last_week'] = (100 * (df2['Confirmed_y'] - df2['prev_value']) / df2['Confirmed_y'])
+    df2 = df2.replace([np.inf, -np.inf], np.nan)
+    df2['share_of_last_week'] = df2['share_of_last_week'].fillna(0)
+    df2['percentage'] = df2['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+    df2['key'] = df2['Province/State']
+    df2 = df2.rename(columns={'Confirmed_x': 'Confirmed'})
+    df = pd.concat([df2[df.columns], df], ignore_index=True)
 
     return df
 
