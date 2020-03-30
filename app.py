@@ -242,7 +242,7 @@ def worldwide_trend(view):
             'layout': go.Layout(
                 title="{} Infections".format(view),
                 xaxis_title="Date",
-                yaxis_title="Number of Individuals",
+                yaxis_title="Number of Cases",
                 font=dict(color=colors['text']),
                 paper_bgcolor=colors['background'],
                 plot_bgcolor=colors['background'],
@@ -274,8 +274,9 @@ def set_countries_value(view, available_options):
 @app.callback(
     Output('active_countries', 'figure'),
     [Input('global_format', 'value'),
-     Input('country_select', 'value')])
-def active_countries(view, countries):
+     Input('country_select', 'value'),
+     Input('column_select', 'value')])
+def active_countries(view, countries, column):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
@@ -289,15 +290,16 @@ def active_countries(view, countries):
     for country in countries:
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == country].groupby('date')['date'].first(),
-                    y=df[df['Country/Region'] == country].groupby('date')['Active'].sum(),
+                    y=df[df['Country/Region'] == country].groupby('date')[column].sum(),
                     name=country,
-                    mode='lines'))
+                    mode='lines',
+                    hoverinfo='x+y+name'))
     return {
             'data': traces,
             'layout': go.Layout(
-                    title="Active Cases by Region",
+                    title="{} by Region".format(column),
                     xaxis_title="Date",
-                    yaxis_title="Number of Individuals",
+                    yaxis_title="Number of Cases",
                     font=dict(color=colors['text']),
                     paper_bgcolor=colors['background'],
                     plot_bgcolor=colors['background'],
@@ -307,57 +309,57 @@ def active_countries(view, countries):
                 )
             }
 
-@app.callback(
-    Output('stacked_active', 'figure'),
-    [Input('global_format', 'value'),
-     Input('column_select', 'value')])
-def stacked_active(view, column):
-    if view == 'Worldwide':
-        df = data
-        scope = 1000
-    elif view == 'United States':
-        df = df_us
-        scope = 1000
-    elif view == 'Europe':
-        df = df_eu
-        scope = 1000
-    else:
-        df = data
-        scope = 1000
+# @app.callback(
+    # Output('stacked_active', 'figure'),
+    # [Input('global_format', 'value'),
+    #  Input('column_select', 'value')])
+# def stacked_active(view, column):
+    # if view == 'Worldwide':
+    #     df = data
+    #     scope = 1000
+    # elif view == 'United States':
+    #     df = df_us
+    #     scope = 1000
+    # elif view == 'Europe':
+    #     df = df_eu
+    #     scope = 1000
+    # else:
+    #     df = data
+    #     scope = 1000
 
-    traces = []
-    for region in df['Country/Region'].unique():
-        if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Confirmed'].sum() > scope:
-            traces.append(go.Scatter(
-                x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
-                y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
-                name=region,
-                hoverinfo='x+y+name',
-                stackgroup='one',
-                mode='none'))
-    if column == 'Recovered':
-        traces.append(go.Scatter(
-            x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
-            y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
-            name='Unidentified State',
-            hoverinfo='x+y+name',
-            stackgroup='one',
-            mode='none'))
+    # traces = []
+    # for region in df['Country/Region'].unique():
+    #     if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Confirmed'].sum() > scope:
+    #         traces.append(go.Scatter(
+    #             x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
+    #             y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
+    #             name=region,
+    #             hoverinfo='x+y+name',
+    #             stackgroup='one',
+    #             mode='none'))
+    # if column == 'Recovered':
+    #     traces.append(go.Scatter(
+    #         x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
+    #         y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
+    #         name='Unidentified State',
+    #         hoverinfo='x+y+name',
+    #         stackgroup='one',
+    #         mode='none'))
         
-    return {
-            'data': traces,
-            'layout': go.Layout(
-                title="{} {} Cases<br>(Regions with greater than {} confirmed cases)".format(view, column, scope),
-                xaxis_title="Date",
-                yaxis_title="Number of Individuals",
-                font=dict(color=colors['text']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
-                xaxis=dict(gridcolor=colors['grid']),
-                yaxis=dict(gridcolor=colors['grid']),
-                hovermode='closest'
-            )
-        }
+    # return {
+    #         'data': traces,
+    #         'layout': go.Layout(
+    #             title="{} {} Cases<br>(Regions with greater than {} confirmed cases)".format(view, column, scope),
+    #             xaxis_title="Date",
+    #             yaxis_title="Number of Individuals",
+    #             font=dict(color=colors['text']),
+    #             paper_bgcolor=colors['background'],
+    #             plot_bgcolor=colors['background'],
+    #             xaxis=dict(gridcolor=colors['grid']),
+    #             yaxis=dict(gridcolor=colors['grid']),
+    #             hovermode='closest'
+    #         )
+    #     }
 
 @app.callback(
     Output('world_map_active', 'figure'),
@@ -512,6 +514,75 @@ def world_map_active(view, date_index):
             )
         }
 
+@app.callback(
+    Output('trajectory', 'figure'),
+    [Input('global_format', 'value'),
+     Input('date_slider', 'value')])
+def trajectory(view, date_index):
+    if view == 'Worldwide':
+        df = data
+        scope = 'countries'
+        threshold = 1000
+    elif view == 'United States':
+        df = data[data['Country/Region'] == 'US']
+        df = df.drop('Country/Region', axis=1)
+        df = df.rename(columns={'Province/State': 'Country/Region'})
+        scope = 'states'
+        threshold = 1000
+    elif view == 'Europe':
+        df = data[data['Country/Region'].isin(eu)]
+        scope = 'countries'
+        threshold = 1000
+    else:
+        df = data
+        scope = 'countries'
+        threshold = 1000
+
+    date = data['date'].unique()[date_index]
+    df = df[df['date'] <= date]
+
+    df = df.groupby(['date', 'Country/Region'], as_index=False)['Confirmed'].sum()
+    df['previous_week'] = df.groupby(['Country/Region'])['Confirmed'].shift(7, fill_value=0)
+    df['new_cases'] = df['Confirmed'] - df['previous_week']
+
+    countries = df.groupby(by='Country/Region', as_index=False)['Confirmed'].max().sort_values(by='Confirmed', ascending=False)
+    countries = countries[countries['Confirmed'] > threshold]['Country/Region'].unique()
+
+    traces = []
+
+    for country in countries:
+        filtered_df = df[df['Country/Region'] == country].reset_index()
+        idx = filtered_df['Confirmed'].sub(threshold).gt(0).idxmax()
+        trace_data = filtered_df[idx:]
+        trace_data['date'] = pd.to_datetime(trace_data['date'])
+        trace_data['date'] = trace_data['date'].dt.strftime('%b %d, %Y')
+
+        traces.append(
+            go.Scatter(
+                    x=trace_data['Confirmed'],
+                    y=trace_data['new_cases'],
+                    mode='lines',
+                    name=country,
+                    text=trace_data['date'],
+                    hoverinfo='x+text+name')
+        )
+
+    return {
+        'data': traces,
+        'layout': go.Layout(
+                title='Trajectory of Cases<br>({} with greater than {} confirmed cases)'.format(scope, threshold),
+                xaxis_type="log",
+                yaxis_type="log",
+                xaxis_title='Total Confirmed Cases',
+                yaxis_title='New Confirmed Cases (in the past week)',
+                font=dict(color=colors['text']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background'],
+                xaxis=dict(gridcolor=colors['grid']),
+                yaxis=dict(gridcolor=colors['grid']),
+                hovermode='closest'
+            )
+        }
 
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
     html.H1(children='COVID-19',
@@ -596,53 +667,57 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             ),
 
         html.Div([
-            dcc.Graph(id='stacked_active'),
-            html.Div(dcc.RadioItems(
-                        id='column_select',
-                        options=[{'label': i, 'value': i} for i in ['Confirmed', 'Active', 'Recovered', 'Deaths']],
-                        value='Active',
-                        labelStyle={'float': 'center', 'display': 'inline-block'},
-                        style={'textAlign': 'center',
-                            'color': colors['text'],
-                            'width': '100%',
-                            'float': 'center',
-                            'display': 'inline-block'
-                            }),
-                    style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
+            dcc.Graph(id='active_countries'),
+            html.Div([
+                dcc.RadioItems(
+                    id='column_select',
+                    options=[{'label': i, 'value': i} for i in ['Confirmed', 'Active', 'Recovered', 'Deaths']],
+                    value='Active',
+                    labelStyle={'float': 'center', 'display': 'inline-block'},
+                    style={'textAlign': 'center',
+                        'color': colors['text'],
+                        'width': '100%',
+                        'float': 'center',
+                        'display': 'inline-block'
+                        }),
+                dcc.Dropdown(
+                    id='country_select',
+                    multi=True,
+                    style={'width': '95%', 'float': 'center'}
+                    )],
+                style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
             ],
             style={'width': '50%', 'float': 'right', 'vertical-align': 'bottom'}
         )],
         style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
         ),
 
-    html.Div([
+    html.Div(
         dcc.Graph(id='world_map_active'),
-        html.Div(dcc.Slider(
-            id='date_slider',
-            min=list(range(len(data['date'].unique())))[0],
-            max=list(range(len(data['date'].unique())))[-1],
-            value=list(range(len(data['date'].unique())))[-1],
-            marks={(idx): (date.format(u"\u2011", u"\u2011") if
-                (idx-4)%7==0 else '') for idx, date in
-                enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
-                item in data['date']])))},
-            step=None,
-            vertical=False,
-            updatemode='mouseup'), style={'width': '98%', 'float': 'left'})],
         style={'width': '50%',
             'display': 'inline-block'}
         ),
 
     html.Div([
-        dcc.Graph(id='active_countries'),
-        dcc.Dropdown(
-            id='country_select',
-            multi=True,
-            style={'width': '95%', 'float': 'center'}
-            )],
+        dcc.Graph(id='trajectory')],
         style={'width': '50%',
             'float': 'right',
             'display': 'inline-block'}),
+
+    html.Div(html.Div(dcc.Slider(
+                id='date_slider',
+                min=list(range(len(data['date'].unique())))[0],
+                max=list(range(len(data['date'].unique())))[-1],
+                value=list(range(len(data['date'].unique())))[-1],
+                marks={(idx): (date.format(u"\u2011", u"\u2011") if
+                    (idx-4)%7==0 else '') for idx, date in
+                    enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
+                    item in data['date']])))},
+                step=None,
+                vertical=False,
+                updatemode='mouseup'),
+            style={'width': '88.89%', 'float': 'left'}), # width = 1 - (100 - x) / x
+        style={'width': '90%', 'float': 'right'}), # width = x
 
     html.Div(
         dcc.Markdown(' '),
