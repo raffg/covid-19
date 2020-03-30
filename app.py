@@ -602,9 +602,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         'color': colors['text']
         }),
 
-    html.Div(
-        dcc.RadioItems(
-            id='global_format',
+    html.Div(dcc.RadioItems(id='global_format',
             options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Europe']],
             value='Worldwide',
             labelStyle={'float': 'center', 'display': 'inline-block'}
@@ -616,8 +614,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
-    html.Div(
-        dcc.Graph(id='confirmed_ind'),
+    html.Div(dcc.Graph(id='confirmed_ind'),
         style={
             'textAlign': 'center',
             'color': colors['red'],
@@ -627,8 +624,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
-    html.Div(
-        dcc.Graph(id='active_ind'),
+    html.Div(dcc.Graph(id='active_ind'),
         style={
             'textAlign': 'center',
             'color': colors['red'],
@@ -638,8 +634,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
-    html.Div(
-        dcc.Graph(id='deaths_ind'),
+    html.Div(dcc.Graph(id='deaths_ind'),
         style={
             'textAlign': 'center',
             'color': colors['red'],
@@ -649,8 +644,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
-    html.Div(
-        dcc.Graph(id='recovered_ind'),
+    html.Div(dcc.Graph(id='recovered_ind'),
         style={
             'textAlign': 'center',
             'color': colors['red'],
@@ -660,12 +654,9 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
-    html.Div([
-        html.Div(
-            dcc.Graph(id='worldwide_trend'),
+    html.Div([html.Div(dcc.Graph(id='worldwide_trend'),
             style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
             ),
-
         html.Div([
             dcc.Graph(id='active_countries'),
             html.Div([
@@ -692,20 +683,17 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
         style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
         ),
 
-    html.Div(
-        dcc.Graph(id='world_map_active'),
+    html.Div(dcc.Graph(id='world_map_active'),
         style={'width': '50%',
             'display': 'inline-block'}
         ),
 
-    html.Div([
-        dcc.Graph(id='trajectory')],
+    html.Div([dcc.Graph(id='trajectory')],
         style={'width': '50%',
             'float': 'right',
             'display': 'inline-block'}),
 
-    html.Div(html.Div(dcc.Slider(
-                id='date_slider',
+    html.Div(html.Div(dcc.Slider(id='date_slider',
                 min=list(range(len(data['date'].unique())))[0],
                 max=list(range(len(data['date'].unique())))[-1],
                 value=list(range(len(data['date'].unique())))[-1],
@@ -719,8 +707,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             style={'width': '88.89%', 'float': 'left'}), # width = 1 - (100 - x) / x
         style={'width': '90%', 'float': 'right'}), # width = x
 
-    html.Div(
-        dcc.Markdown(' '),
+    html.Div(dcc.Markdown(' '),
         style={
             'textAlign': 'center',
             'color': '#FEFEFE',
@@ -728,8 +715,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             'float': 'center',
             'display': 'inline-block'}),
     
-    html.Div(
-        dcc.Markdown('''
+    html.Div(dcc.Markdown('''
             Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
             Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)
             '''),
