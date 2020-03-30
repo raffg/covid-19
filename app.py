@@ -27,6 +27,7 @@ app.title = 'COVID-19'
 
 data = pd.read_csv('dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
+update = data['date'].dt.strftime('%B %d, %Y').max()
 
 geo_us = pd.read_csv('geo_us.csv')
 
@@ -520,6 +521,11 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
+    html.Div(children='Data last updated {} at 5pm Pacific time'.format(update), style={
+        'textAlign': 'center',
+        'color': colors['text']
+        }),
+    
     html.Div(children='Select focus for the dashboard', style={
         'textAlign': 'center',
         'color': colors['text']
