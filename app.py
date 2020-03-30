@@ -520,7 +520,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             }
         ),
 
-    html.Div(children='Select focus for the dashboard', style={
+    html.Div(children='March, 30 2020 5:30pm, Pacific time<br />Select focus for the dashboard', style={
         'textAlign': 'center',
         'color': colors['text']
         }),
