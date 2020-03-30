@@ -61,6 +61,7 @@ df_us = pd.read_csv('df_us.csv')
 df_eu = pd.read_csv('df_eu.csv')
 df_us_counties = pd.read_csv('df_us_county.csv')
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
+df_us_counties['key'] = df_us_counties['key'].astype(str)
 
 @app.callback(
     Output('confirmed_ind', 'figure'),

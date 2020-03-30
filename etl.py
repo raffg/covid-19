@@ -5,7 +5,6 @@ import re
 from datetime import date, timedelta
 import io
 import requests
-import json
 
 
 def etl(source='web'):
@@ -287,6 +286,7 @@ def us_county():
             files.append(df)
     df = pd.concat(files, axis=0, ignore_index=True, sort=False)
     df = df.loc[df['Country_Region'] == 'US']
+    df = df.dropna(subset=['Admin2'])
     df['key'] = df['Admin2'] + ' County, ' + df['Province_State']
 
     # Fill missing values as 0; create Active cases column
@@ -305,8 +305,8 @@ def us_county():
             'Long_']]
 
     # Create two dataframes to handle share of last week before county-level data was available
-    df1 = df[df['date'] <= '2020-03-28']
-    df2 = df[df['date'] > '2020-03-28']
+    df1 = df[df['date'] <= '2020-03-28'].copy()
+    df2 = df[df['date'] > '2020-03-28'].copy()
 
     # Collect state-level data from the day prior
     prev = pd.read_csv('data/03-21-2020.csv')
@@ -336,9 +336,13 @@ def us_county():
     df1 = df1[columns]
 
     # Calculate share_of_last_week appropriately once data from previous week is available
-    df2['share_of_last_week'] = 100 * (df2['Confirmed'] - df2['Confirmed'].shift(7)) / df2['Confirmed']
-    df2['percentage'] = df2['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
-    df2 = df2[columns]
+    df3 = pd.concat([df1, df2], sort=True)
+    df3['previous_week'] = df3.groupby('key')['Confirmed'].shift(7)
+    df3['share_of_last_week'] = 100 * (df3['Confirmed'] - df3['previous_week']) / df3['Confirmed']
+    df3 = df3.loc[df2.index]
+    df3['percentage'] = df3['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
+
+    df2 = df3[columns]
 
     # Combine the two dataframes
     df = pd.concat([df1, df2], ignore_index=True)
