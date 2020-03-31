@@ -375,67 +375,70 @@ def active_countries(view, countries, column):
 def world_map_active(view, date_index):
     if view == 'Worldwide':
         df = data
+        df = world_map_processing(df, date_index)
         scope='world'
         projection_type='natural earth'
     elif view == 'United States':
         scope='usa'
         projection_type='albers usa'
         df = df_us_counties
-        date = df['date'].unique()[date_index]
-        df = df[df['date'] == date]
-
-        return {
-                'data': [
-                    go.Scattergeo(
-                        lon = df['Longitude'],
-                        lat = df['Latitude'],
-                        text = df['key'] + ': ' +\
-                                ['{:,}'.format(i) for i in df['Confirmed']] +\
-                                ' total cases, ' + df['percentage'] +\
-                                '% from previous week',
-                        hoverinfo = 'text',
-                        mode = 'markers',
-                        marker = dict(reversescale = False,
-                            autocolorscale = False,
-                            symbol = 'circle',
-                            size = np.sqrt(df['Confirmed']),
-                            sizeref = 2,
-                            sizemin = 0,
-                            line = dict(width=.5, color='rgba(0, 0, 0)'),
-                            colorscale = 'Reds',
-                            cmin = 0,
-                            color = df['share_of_last_week'],
-                            cmax = 100,
-                            colorbar = dict(
-                                title = "Percentage of<br>cases occurring in<br>the previous week",
-                                thickness = 30)
-                            )
-                        )
-                ],
-                'layout': go.Layout(
-                    title ='Number of cumulative confirmed cases (size of marker)<br>and share of new cases from the previous week (color)',
-                    geo=dict(scope=scope,
-                            projection_type=projection_type,
-                            showland = True,
-                            landcolor = "rgb(100, 125, 100)",
-                            showocean = True,
-                            oceancolor = "rgb(80, 150, 250)",
-                            showcountries=True,
-                            showlakes=True),
-                    font=dict(color=colors['text']),
-                    paper_bgcolor=colors['background'],
-                    plot_bgcolor=colors['background']
-                )
-            }
+        df = df[df['date'] == df['date'].unique()[date_index]]
+        df = df.rename(columns={'key': 'Country/Region'})
     elif view == 'Europe':
         df = df_eu
+        df = world_map_processing(df, date_index)
         scope='europe'
         projection_type='natural earth'
     else:
         df = data
+        df = world_map_processing(df, date_index)
         scope='world'
         projection_type='natural earth',
+    return {
+            'data': [
+                go.Scattergeo(
+                    lon = df['Longitude'],
+                    lat = df['Latitude'],
+                    text = df['Country/Region'] + ': ' +\
+                        ['{:,}'.format(i) for i in df['Confirmed']] +\
+                        ' total cases, ' + df['percentage'] +\
+                        '% from previous week',
+                    hoverinfo = 'text',
+                    mode = 'markers',
+                    marker = dict(reversescale = False,
+                        autocolorscale = False,
+                        symbol = 'circle',
+                        size = np.sqrt(df['Confirmed']),
+                        sizeref = 5,
+                        sizemin = 0,
+                        line = dict(width=.5, color='rgba(0, 0, 0)'),
+                        colorscale = 'Reds',
+                        cmin = 0,
+                        color = df['share_of_last_week'],
+                        cmax = 100,
+                        colorbar = dict(
+                            title = "Percentage of<br>cases occurring in<br>the previous week",
+                            thickness = 30)
+                        )
+                    )
+            ],
+            'layout': go.Layout(
+                title ='Number of Cumulative Confirmed Cases (size of marker)<br>and Share of New Cases from the Previous Week (color)',
+                geo=dict(scope=scope,
+                        projection_type=projection_type,
+                        showland = True,
+                        landcolor = "rgb(100, 125, 100)",
+                        showocean = True,
+                        oceancolor = "rgb(80, 150, 250)",
+                        showcountries=True,
+                        showlakes=True),
+                font=dict(color=colors['text']),
+                paper_bgcolor=colors['background'],
+                plot_bgcolor=colors['background']
+            )
+        }
 
+def world_map_processing(df, date_index):
     # World map
     date = df['date'].unique()[date_index]
 
@@ -477,49 +480,7 @@ def world_map_active(view, date_index):
     df_world_map = df_world_map[df_world_map['Country/Region'] != 'Cruise Ship']
     df_world_map = df_world_map[df_world_map['Country/Region'] != 'Diamond Princess']
 
-    return {
-            'data': [
-                go.Scattergeo(
-                    lon = df_world_map['Longitude'],
-                    lat = df_world_map['Latitude'],
-                    text = df_world_map['Country/Region'] + ': ' +\
-                        ['{:,}'.format(i) for i in df_world_map['Confirmed']] +\
-                        ' total cases, ' + df_world_map['percentage'] +\
-                        '% from previous week',
-                    hoverinfo = 'text',
-                    mode = 'markers',
-                    marker = dict(reversescale = False,
-                        autocolorscale = False,
-                        symbol = 'circle',
-                        size = np.sqrt(df_world_map['Confirmed']),
-                        sizeref = 5,
-                        sizemin = 0,
-                        line = dict(width=.5, color='rgba(0, 0, 0)'),
-                        colorscale = 'Reds',
-                        cmin = 0,
-                        color = df_world_map['share_of_last_week'],
-                        cmax = 100,
-                        colorbar = dict(
-                            title = "Percentage of<br>cases occurring in<br>the previous week",
-                            thickness = 30)
-                        )
-                    )
-            ],
-            'layout': go.Layout(
-                title ='Number of cumulative confirmed cases (size of marker)<br>and share of new cases from the previous week (color)',
-                geo=dict(scope=scope,
-                        projection_type=projection_type,
-                        showland = True,
-                        landcolor = "rgb(100, 125, 100)",
-                        showocean = True,
-                        oceancolor = "rgb(80, 150, 250)",
-                        showcountries=True,
-                        showlakes=True),
-                font=dict(color=colors['text']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background']
-            )
-        }
+    return df_world_map
 
 @app.callback(
     Output('trajectory', 'figure'),
