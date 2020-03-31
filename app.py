@@ -294,6 +294,13 @@ def active_countries(view, countries, column):
                     name=country,
                     mode='lines',
                     hoverinfo='x+y+name'))
+    if column == 'Recovered':
+        traces.append(go.Scatter(
+                    x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
+                    y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
+                    name='Unidentified',
+                    mode='lines',
+                    hoverinfo='x+y+name'))
     return {
             'data': traces,
             'layout': go.Layout(
