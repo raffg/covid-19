@@ -409,7 +409,7 @@ def world_map_active(view, date_index):
                         autocolorscale = False,
                         symbol = 'circle',
                         size = np.sqrt(df['Confirmed']),
-                        sizeref = 5,
+                        sizeref = 2 if view == 'United States' else 5,
                         sizemin = 0,
                         line = dict(width=.5, color='rgba(0, 0, 0)'),
                         colorscale = 'Reds',
@@ -507,11 +507,17 @@ def trajectory(view, date_index):
         threshold = 1000
 
     date = data['date'].unique()[date_index]
-    df = df[df['date'] <= date]
 
     df = df.groupby(['date', 'Country/Region'], as_index=False)['Confirmed'].sum()
     df['previous_week'] = df.groupby(['Country/Region'])['Confirmed'].shift(7, fill_value=0)
     df['new_cases'] = df['Confirmed'] - df['previous_week']
+
+    xmax = np.log(1.25 * df['Confirmed'].max()) / np.log(10)
+    xmin = np.log(threshold) / np.log(10)
+    ymax = np.log(1.25 * df['new_cases'].max()) / np.log(10)
+    ymin = np.log(.8 * df[df['Confirmed'] >= threshold]['new_cases'].min()) / np.log(10)
+    
+    df = df[df['date'] <= date]
 
     countries = df.groupby(by='Country/Region', as_index=False)['Confirmed'].max().sort_values(by='Confirmed', ascending=False)
     countries = countries[countries['Confirmed'] > threshold]['Country/Region'].unique()
@@ -546,9 +552,12 @@ def trajectory(view, date_index):
                 font=dict(color=colors['text']),
                 paper_bgcolor=colors['background'],
                 plot_bgcolor=colors['background'],
-                xaxis=dict(gridcolor=colors['grid']),
-                yaxis=dict(gridcolor=colors['grid']),
-                hovermode='closest'
+                xaxis=dict(gridcolor=colors['grid'],
+                           range=[xmin, xmax]),
+                yaxis=dict(gridcolor=colors['grid'],
+                           range=[ymin, ymax]),
+                hovermode='closest',
+                showlegend=True
             )
         }
 
