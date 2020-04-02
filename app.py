@@ -516,11 +516,14 @@ def trajectory(view, date_index):
     xmin = np.log(threshold) / np.log(10)
     ymax = np.log(1.25 * df['new_cases'].max()) / np.log(10)
     ymin = np.log(.8 * df[df['Confirmed'] >= threshold]['new_cases'].min()) / np.log(10)
+
+    countries_full = df.groupby(by='Country/Region', as_index=False)['Confirmed'].max().sort_values(by='Confirmed', ascending=False)['Country/Region'].to_list()
     
     df = df[df['date'] <= date]
 
     countries = df.groupby(by='Country/Region', as_index=False)['Confirmed'].max().sort_values(by='Confirmed', ascending=False)
-    countries = countries[countries['Confirmed'] > threshold]['Country/Region'].unique()
+    countries = countries[countries['Confirmed'] > threshold]['Country/Region'].to_list()
+    countries = [country for country in countries_full if country in countries]
 
     traces = []
 
