@@ -27,7 +27,7 @@ app.title = 'COVID-19'
 
 data = pd.read_csv('dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
-update = data['date'].dt.strftime('%B %d, %Y').max()
+update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
 
 geo_us = pd.read_csv('geo_us.csv')
 
