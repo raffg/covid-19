@@ -42,7 +42,7 @@ def etl(source='web'):
             url = r'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/{}.csv'.format(file)
             raw_string = requests.get(url).content
             df = pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
-            if b'404: Not Found\n' not in raw_string:
+            if b'404: Not Found' not in raw_string:
                 df.to_csv('data/{}.csv'.format(file), index=False)
             df['date'] = pd.to_datetime(file)
             df.rename(columns={'Province_State': 'Province/State',
