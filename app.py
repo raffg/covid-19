@@ -265,7 +265,7 @@ def set_active_options(selected_view):
      Input('country_select', 'options')])
 def set_countries_value(view, available_options):
     if view == 'Worldwide':
-        return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']
+        return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany', 'Iran']
     elif view == 'United States':
         return ['New York', 'Washington', 'California', 'Florida', 'Michigan', 'Louisiana']
     elif view == 'Europe':
@@ -289,6 +289,8 @@ def active_countries(view, countries, column):
         df = data
 
     traces = []
+    countries = df[(df['Country/Region'].isin(countries)) &
+                   (df['date'] == df['date'].max())].groupby('Country/Region')['Active'].sum().sort_values(ascending=False).index.to_list()
     for country in countries:
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == country].groupby('date')['date'].first(),
