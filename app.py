@@ -19,6 +19,8 @@ import cufflinks
 cufflinks.go_offline(connected=True)
 init_notebook_mode(connected=True)
 
+import plotly
+
 
 app = dash.Dash(__name__)
 server = app.server
@@ -31,7 +33,7 @@ update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
 
 geo_us = pd.read_csv('geo_us.csv')
 
-colors = {
+dash_colors = {
     'background': '#111111',
     'text': '#BEBEBE',
     'grid': '#333333',
@@ -92,9 +94,9 @@ def confirmed(view):
                     'domain': {'y': [0, 1], 'x': [0, 1]}}],
             'layout': go.Layout(
                 title={'text': "CUMULATIVE CONFIRMED"},
-                font=dict(color=colors['red']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
+                font=dict(color=dash_colors['red']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background'],
                 height=200
                 )
             }
@@ -127,9 +129,9 @@ def active(view):
                     'domain': {'y': [0, 1], 'x': [0, 1]}}],
             'layout': go.Layout(
                 title={'text': "CURRENTLY ACTIVE"},
-                font=dict(color=colors['red']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
+                font=dict(color=dash_colors['red']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background'],
                 height=200
                 )
             }
@@ -162,9 +164,9 @@ def recovered(view):
                     'domain': {'y': [0, 1], 'x': [0, 1]}}],
             'layout': go.Layout(
                 title={'text': "RECOVERED CASES"},
-                font=dict(color=colors['red']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
+                font=dict(color=dash_colors['red']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background'],
                 height=200
                 )
             }
@@ -197,9 +199,9 @@ def deaths(view):
                     'domain': {'y': [0, 1], 'x': [0, 1]}}],
             'layout': go.Layout(
                 title={'text': "DEATHS TO DATE"},
-                font=dict(color=colors['red']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
+                font=dict(color=dash_colors['red']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background'],
                 height=200
                 )
             }
@@ -243,11 +245,11 @@ def worldwide_trend(view):
                 title="{} Infections".format(view),
                 xaxis_title="Date",
                 yaxis_title="Number of Cases",
-                font=dict(color=colors['text']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
-                xaxis=dict(gridcolor=colors['grid']),
-                yaxis=dict(gridcolor=colors['grid'])
+                font=dict(color=dash_colors['text']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background'],
+                xaxis=dict(gridcolor=dash_colors['grid']),
+                yaxis=dict(gridcolor=dash_colors['grid'])
                 )
             }
 
@@ -307,11 +309,11 @@ def active_countries(view, countries, column):
                     title="{} by Region".format(column),
                     xaxis_title="Date",
                     yaxis_title="Number of Cases",
-                    font=dict(color=colors['text']),
-                    paper_bgcolor=colors['background'],
-                    plot_bgcolor=colors['background'],
-                    xaxis=dict(gridcolor=colors['grid']),
-                    yaxis=dict(gridcolor=colors['grid']),
+                    font=dict(color=dash_colors['text']),
+                    paper_bgcolor=dash_colors['background'],
+                    plot_bgcolor=dash_colors['background'],
+                    xaxis=dict(gridcolor=dash_colors['grid']),
+                    yaxis=dict(gridcolor=dash_colors['grid']),
                     hovermode='closest'
                 )
             }
@@ -359,11 +361,11 @@ def active_countries(view, countries, column):
     #             title="{} {} Cases<br>(Regions with greater than {} confirmed cases)".format(view, column, scope),
     #             xaxis_title="Date",
     #             yaxis_title="Number of Individuals",
-    #             font=dict(color=colors['text']),
-    #             paper_bgcolor=colors['background'],
-    #             plot_bgcolor=colors['background'],
-    #             xaxis=dict(gridcolor=colors['grid']),
-    #             yaxis=dict(gridcolor=colors['grid']),
+    #             font=dict(color=dash_colors['text']),
+    #             paper_bgcolor=dash_colors['background'],
+    #             plot_bgcolor=dash_colors['background'],
+    #             xaxis=dict(gridcolor=dash_colors['grid']),
+    #             yaxis=dict(gridcolor=dash_colors['grid']),
     #             hovermode='closest'
     #         )
     #     }
@@ -432,9 +434,9 @@ def world_map_active(view, date_index):
                         oceancolor = "rgb(80, 150, 250)",
                         showcountries=True,
                         showlakes=True),
-                font=dict(color=colors['text']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background']
+                font=dict(color=dash_colors['text']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background']
             )
         }
 
@@ -526,6 +528,8 @@ def trajectory(view, date_index):
     countries = [country for country in countries_full if country in countries]
 
     traces = []
+    trace_colors = plotly.colors.qualitative.D3
+    color_idx = 0
 
     for country in countries:
         filtered_df = df[df['Country/Region'] == country].reset_index()
@@ -539,10 +543,22 @@ def trajectory(view, date_index):
                     x=trace_data['Confirmed'],
                     y=trace_data['new_cases'],
                     mode='lines',
+                    marker=dict(color=trace_colors[color_idx % len(trace_colors)]),
                     name=country,
                     text=trace_data['date'],
                     hoverinfo='x+text+name')
         )
+
+        traces.append(
+            go.Scatter(
+                    x=trace_data[trace_data['date'] == trace_data['date'].iloc[-1]]['Confirmed'],
+                    y=trace_data[trace_data['date'] == trace_data['date'].iloc[-1]]['new_cases'],
+                    mode='markers',
+                    marker=dict(color=trace_colors[color_idx % len(trace_colors)]),
+                    name=country,
+                    showlegend=False)
+        )
+        color_idx += 1
 
     return {
         'data': traces,
@@ -552,34 +568,34 @@ def trajectory(view, date_index):
                 yaxis_type="log",
                 xaxis_title='Total Confirmed Cases',
                 yaxis_title='New Confirmed Cases (in the past week)',
-                font=dict(color=colors['text']),
-                paper_bgcolor=colors['background'],
-                plot_bgcolor=colors['background'],
-                xaxis=dict(gridcolor=colors['grid'],
+                font=dict(color=dash_colors['text']),
+                paper_bgcolor=dash_colors['background'],
+                plot_bgcolor=dash_colors['background'],
+                xaxis=dict(gridcolor=dash_colors['grid'],
                            range=[xmin, xmax]),
-                yaxis=dict(gridcolor=colors['grid'],
+                yaxis=dict(gridcolor=dash_colors['grid'],
                            range=[ymin, ymax]),
                 hovermode='closest',
                 showlegend=True
             )
         }
 
-app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
+app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, children=[
     html.H1(children='COVID-19',
         style={
             'textAlign': 'center',
-            'color': colors['text']
+            'color': dash_colors['text']
             }
         ),
 
     html.Div(children='Data last updated {} at 5pm Pacific time'.format(update), style={
         'textAlign': 'center',
-        'color': colors['text']
+        'color': dash_colors['text']
         }),
     
     html.Div(children='Select focus for the dashboard', style={
         'textAlign': 'center',
-        'color': colors['text']
+        'color': dash_colors['text']
         }),
 
     html.Div(dcc.RadioItems(id='global_format',
@@ -587,7 +603,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             value='Worldwide',
             labelStyle={'float': 'center', 'display': 'inline-block'}
             ), style={'textAlign': 'center',
-                'color': colors['text'],
+                'color': dash_colors['text'],
                 'width': '100%',
                 'float': 'center',
                 'display': 'inline-block'
@@ -597,7 +613,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.Div(dcc.Graph(id='confirmed_ind'),
         style={
             'textAlign': 'center',
-            'color': colors['red'],
+            'color': dash_colors['red'],
             'width': '25%',
             'float': 'left',
             'display': 'inline-block'
@@ -607,7 +623,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.Div(dcc.Graph(id='active_ind'),
         style={
             'textAlign': 'center',
-            'color': colors['red'],
+            'color': dash_colors['red'],
             'width': '25%',
             'float': 'left',
             'display': 'inline-block'
@@ -617,7 +633,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.Div(dcc.Graph(id='deaths_ind'),
         style={
             'textAlign': 'center',
-            'color': colors['red'],
+            'color': dash_colors['red'],
             'width': '25%',
             'float': 'left',
             'display': 'inline-block'
@@ -627,7 +643,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
     html.Div(dcc.Graph(id='recovered_ind'),
         style={
             'textAlign': 'center',
-            'color': colors['red'],
+            'color': dash_colors['red'],
             'width': '25%',
             'float': 'left',
             'display': 'inline-block'
@@ -646,7 +662,7 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
                     value='Active',
                     labelStyle={'float': 'center', 'display': 'inline-block'},
                     style={'textAlign': 'center',
-                        'color': colors['text'],
+                        'color': dash_colors['text'],
                         'width': '100%',
                         'float': 'center',
                         'display': 'inline-block'
