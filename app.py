@@ -19,8 +19,6 @@ import cufflinks
 cufflinks.go_offline(connected=True)
 init_notebook_mode(connected=True)
 
-import plotly
-
 
 app = dash.Dash(__name__)
 server = app.server
@@ -530,8 +528,6 @@ def trajectory(view, date_index):
     countries = [country for country in countries_full if country in countries]
 
     traces = []
-    trace_colors = plotly.colors.qualitative.D3
-    color_idx = 0
 
     for country in countries:
         filtered_df = df[df['Country/Region'] == country].reset_index()
@@ -540,27 +536,19 @@ def trajectory(view, date_index):
         trace_data['date'] = pd.to_datetime(trace_data['date'])
         trace_data['date'] = trace_data['date'].dt.strftime('%b %d, %Y')
 
+        marker_size = [0] * len(trace_data)
+        marker_size[-1] = 6
+
         traces.append(
             go.Scatter(
                     x=trace_data['Confirmed'],
                     y=trace_data['new_cases'],
-                    mode='lines',
-                    marker=dict(color=trace_colors[color_idx % len(trace_colors)]),
+                    mode='lines+markers',
+                    marker=dict(size=marker_size, line=dict(width=0)),
                     name=country,
                     text=trace_data['date'],
                     hoverinfo='x+text+name')
         )
-
-        traces.append(
-            go.Scatter(
-                    x=trace_data[trace_data['date'] == trace_data['date'].iloc[-1]]['Confirmed'],
-                    y=trace_data[trace_data['date'] == trace_data['date'].iloc[-1]]['new_cases'],
-                    mode='markers',
-                    marker=dict(color=trace_colors[color_idx % len(trace_colors)]),
-                    name=country,
-                    showlegend=False)
-        )
-        color_idx += 1
 
     return {
         'data': traces,
