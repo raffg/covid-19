@@ -269,6 +269,18 @@ def eu(data):
                             'Active': [0, 0]})).sort_index()
     return df_eu
 
+def china(data):
+    provinces = ['Anhui', 'Beijing', 'Chongqing', 'Fujian', 'Gansu', 'Guangdong',
+       'Guangxi', 'Guizhou', 'Hainan', 'Hebei', 'Heilongjiang', 'Henan',
+       'Hubei', 'Hunan', 'Inner Mongolia', 'Jiangsu', 'Jiangxi', 'Jilin',
+       'Liaoning', 'Ningxia', 'Qinghai', 'Shaanxi', 'Shandong',
+       'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin', 'Tibet', 'Xinjiang',
+       'Yunnan', 'Zhejiang', 'Hong Kong', 'Macau']
+    df_china = data[data['Province/State'].isin(provinces)]
+    df_china = df_china.drop('Country/Region', axis=1)
+    df_china = df_china.rename(columns={'Province/State': 'Country/Region'})
+    return df_china
+
 def us_county():
     path = 'data'
     all_files = glob.glob(path + "/*.csv")
@@ -381,6 +393,9 @@ if __name__ == '__main__':
 
     df_eu = eu(data)
     df_eu.to_csv('df_eu.csv', index=False)
+
+    df_china = china(data)
+    df_china.to_csv('df_china.csv', index=False)
 
     df_us_county = us_county()
     df_us_county.to_csv('df_us_county.csv', index=False)

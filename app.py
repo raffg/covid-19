@@ -56,10 +56,21 @@ eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzego
     'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
     'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
 
-region_options = {'Worldwide': available_countries, 'United States': states, 'Europe': eu}
+china = ['Anhui', 'Beijing', 'Chongqing', 'Fujian', 'Gansu', 'Guangdong',
+    'Guangxi', 'Guizhou', 'Hainan', 'Hebei', 'Heilongjiang', 'Henan',
+    'Hubei', 'Hunan', 'Inner Mongolia', 'Jiangsu', 'Jiangxi', 'Jilin',
+    'Liaoning', 'Ningxia', 'Qinghai', 'Shaanxi', 'Shandong',
+    'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin', 'Tibet', 'Xinjiang',
+    'Yunnan', 'Zhejiang', 'Hong Kong', 'Macau']
+
+region_options = {'Worldwide': available_countries,
+                  'United States': states,
+                  'Europe': eu,
+                  'China': china}
 
 df_us = pd.read_csv('df_us.csv')
 df_eu = pd.read_csv('df_eu.csv')
+df_china = pd.read_csv('df_china.csv')
 df_us_counties = pd.read_csv('df_us_county.csv')
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
 df_us_counties['key'] = df_us_counties['key'].astype(str)
@@ -74,6 +85,8 @@ def confirmed(view):
         df = df_us
     elif view == 'Europe':
         df = df_eu
+    elif view == 'China':
+        df = df_china
     else:
         df = data
 
@@ -109,6 +122,8 @@ def active(view):
         df = df_us
     elif view == 'Europe':
         df = df_eu
+    elif view == 'China':
+        df = df_china
     else:
         df = data
 
@@ -144,6 +159,8 @@ def recovered(view):
         df = df_us
     elif view == 'Europe':
         df = df_eu
+    elif view == 'China':
+        df = df_china
     else:
         df = data
 
@@ -179,6 +196,8 @@ def deaths(view):
         df = df_us
     elif view == 'Europe':
         df = df_eu
+    elif view == 'China':
+        df = df_china
     else:
         df = data
 
@@ -214,6 +233,8 @@ def worldwide_trend(view):
         df = df_us
     elif view == 'Europe':
         df = df_eu
+    elif view == 'China':
+        df = df_china
     else:
         df = data
 
@@ -268,6 +289,8 @@ def set_countries_value(view, available_options):
         return ['New York', 'Washington', 'California', 'Florida', 'Michigan', 'Louisiana']
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
+    elif view == 'China':
+        return ['Hubei', 'Guangdong', 'Henan', 'Zhejiang', 'Hunan', 'Hong Kong', 'Anhui']
     else:
         return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']
 
@@ -283,6 +306,8 @@ def active_countries(view, countries, column):
         df = df_us
     elif view == 'Europe':
         df = df_eu
+    elif view == 'China':
+        df = df_china
     else:
         df = data
 
@@ -390,6 +415,11 @@ def world_map_active(view, date_index):
         df = df_eu
         df = world_map_processing(df, date_index)
         scope='europe'
+        projection_type='natural earth'
+    elif view == 'China':
+        df = df_china
+        df = world_map_processing(df, date_index)
+        scope='asia'
         projection_type='natural earth'
     else:
         df = data
@@ -503,6 +533,12 @@ def trajectory(view, date_index):
         df = data[data['Country/Region'].isin(eu)]
         scope = 'countries'
         threshold = 1000
+    elif view == 'China':
+        df = data[data['Country/Region'] == 'China']
+        df = df.drop('Country/Region', axis=1)
+        df = df.rename(columns={'Province/State': 'Country/Region'})
+        scope = 'provinces'
+        threshold = 1000
     else:
         df = data
         scope = 'countries'
@@ -513,11 +549,15 @@ def trajectory(view, date_index):
     df = df.groupby(['date', 'Country/Region'], as_index=False)['Confirmed'].sum()
     df['previous_week'] = df.groupby(['Country/Region'])['Confirmed'].shift(7, fill_value=0)
     df['new_cases'] = df['Confirmed'] - df['previous_week']
+    df['new_cases'] = df['new_cases'].clip(lower=0)
 
     xmax = np.log(1.25 * df['Confirmed'].max()) / np.log(10)
     xmin = np.log(threshold) / np.log(10)
     ymax = np.log(1.25 * df['new_cases'].max()) / np.log(10)
-    ymin = np.log(.8 * df[df['Confirmed'] >= threshold]['new_cases'].min()) / np.log(10)
+    if df[df['Confirmed'] >= threshold]['new_cases'].min() == 0:
+        ymin = 0
+    else:
+        ymin = np.log(.8 * df[df['Confirmed'] >= threshold]['new_cases'].min()) / np.log(10)
 
     countries_full = df.groupby(by='Country/Region', as_index=False)['Confirmed'].max().sort_values(by='Confirmed', ascending=False)['Country/Region'].to_list()
     
@@ -589,7 +629,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         }),
 
     html.Div(dcc.RadioItems(id='global_format',
-            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Europe']],
+            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Europe', 'China']],
             value='Worldwide',
             labelStyle={'float': 'center', 'display': 'inline-block'}
             ), style={'textAlign': 'center',
@@ -715,4 +755,4 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
