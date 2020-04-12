@@ -536,8 +536,8 @@ def trajectory(view, date_index):
         trace_data['date'] = pd.to_datetime(trace_data['date'])
         trace_data['date'] = trace_data['date'].dt.strftime('%b %d, %Y')
 
-        marker_size = [0] * len(trace_data)
-        marker_size[-1] = 6
+        marker_size = [0] * (len(trace_data) - 1)
+        marker_size.append(6)
 
         traces.append(
             go.Scatter(
