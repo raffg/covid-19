@@ -41,27 +41,34 @@ dash_colors = {
 available_countries = sorted(data['Country/Region'].unique())
 
 states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-    'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
-    'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
-    'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-    'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-    'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-    'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-    'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
+       'Colorado', 'Connecticut', 'Delaware', 'District of Columbia',
+       'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana',
+       'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
+       'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+       'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+       'New Jersey', 'New Mexico', 'New York', 'North Carolina',
+       'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+       'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee',
+       'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+       'West Virginia', 'Wisconsin', 'Wyoming']
 
-eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
-    'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
-    'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Kosovo', 'Latvia', 'Liechtenstein',
-    'Lithuania', 'Luxembourg', 'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands', 'North Macedonia', 'Norway',
-    'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-    'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
+eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium',
+       'Bosnia and Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus',
+       'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
+       'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy',
+       'Kosovo', 'Latvia', 'Liechtenstein', 'Lithuania', 'Luxembourg',
+       'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands',
+       'North Macedonia', 'Norway', 'Poland', 'Portugal', 'Romania',
+       'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+       'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom',
+       'Vatican City']
 
 china = ['Anhui', 'Beijing', 'Chongqing', 'Fujian', 'Gansu', 'Guangdong',
-    'Guangxi', 'Guizhou', 'Hainan', 'Hebei', 'Heilongjiang', 'Henan',
-    'Hubei', 'Hunan', 'Inner Mongolia', 'Jiangsu', 'Jiangxi', 'Jilin',
-    'Liaoning', 'Ningxia', 'Qinghai', 'Shaanxi', 'Shandong',
-    'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin', 'Tibet', 'Xinjiang',
-    'Yunnan', 'Zhejiang', 'Hong Kong', 'Macau']
+       'Guangxi', 'Guizhou', 'Hainan', 'Hebei', 'Heilongjiang', 'Henan',
+       'Hong Kong', 'Hubei', 'Hunan', 'Inner Mongolia', 'Jiangsu',
+       'Jiangxi', 'Jilin', 'Liaoning', 'Macau', 'Ningxia', 'Qinghai',
+       'Shaanxi', 'Shandong', 'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin',
+       'Tibet', 'Xinjiang', 'Yunnan', 'Zhejiang']
 
 region_options = {'Worldwide': available_countries,
                   'United States': states,
