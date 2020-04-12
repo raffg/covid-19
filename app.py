@@ -343,58 +343,6 @@ def active_countries(view, countries, column):
                 )
             }
 
-# @app.callback(
-    # Output('stacked_active', 'figure'),
-    # [Input('global_format', 'value'),
-    #  Input('column_select', 'value')])
-# def stacked_active(view, column):
-    # if view == 'Worldwide':
-    #     df = data
-    #     scope = 1000
-    # elif view == 'United States':
-    #     df = df_us
-    #     scope = 1000
-    # elif view == 'Europe':
-    #     df = df_eu
-    #     scope = 1000
-    # else:
-    #     df = data
-    #     scope = 1000
-
-    # traces = []
-    # for region in df['Country/Region'].unique():
-    #     if df[(df['date'] == df['date'].iloc[-1]) & (df['Country/Region'] == region)]['Confirmed'].sum() > scope:
-    #         traces.append(go.Scatter(
-    #             x=df[df['Country/Region'] == region].groupby('date')['date'].first(),
-    #             y=df[df['Country/Region'] == region].groupby('date')[column].sum(),
-    #             name=region,
-    #             hoverinfo='x+y+name',
-    #             stackgroup='one',
-    #             mode='none'))
-    # if column == 'Recovered':
-    #     traces.append(go.Scatter(
-    #         x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
-    #         y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
-    #         name='Unidentified State',
-    #         hoverinfo='x+y+name',
-    #         stackgroup='one',
-    #         mode='none'))
-        
-    # return {
-    #         'data': traces,
-    #         'layout': go.Layout(
-    #             title="{} {} Cases<br>(Regions with greater than {} confirmed cases)".format(view, column, scope),
-    #             xaxis_title="Date",
-    #             yaxis_title="Number of Individuals",
-    #             font=dict(color=dash_colors['text']),
-    #             paper_bgcolor=dash_colors['background'],
-    #             plot_bgcolor=dash_colors['background'],
-    #             xaxis=dict(gridcolor=dash_colors['grid']),
-    #             yaxis=dict(gridcolor=dash_colors['grid']),
-    #             hovermode='closest'
-    #         )
-    #     }
-
 @app.callback(
     Output('world_map_active', 'figure'),
     [Input('global_format', 'value'),
