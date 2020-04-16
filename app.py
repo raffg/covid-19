@@ -698,7 +698,8 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
     
     html.Div(dcc.Markdown('''
             Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
-            Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)
+            Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)  
+            Instructions and feature documention [here](https://github.com/raffg/covid-19/blob/master/README.md)  
             '''),
             style={
                 'textAlign': 'center',
