@@ -351,36 +351,41 @@ def active_countries(view, countries, column):
             }
 
 @app.callback(
-    Output('world_map_active', 'figure'),
+    Output('world_map', 'figure'),
     [Input('global_format', 'value'),
      Input('date_slider', 'value')])
-def world_map_active(view, date_index):
+def world_map(view, date_index):
     if view == 'Worldwide':
         df = data
         df = world_map_processing(df, date_index)
         scope='world'
         projection_type='natural earth'
+        sizeref=10
     elif view == 'United States':
         scope='usa'
         projection_type='albers usa'
         df = df_us_counties
         df = df[df['date'] == df['date'].unique()[date_index]]
         df = df.rename(columns={'key': 'Country/Region'})
+        sizeref=3
     elif view == 'Europe':
         df = df_eu
         df = world_map_processing(df, date_index)
         scope='europe'
         projection_type='natural earth'
+        sizeref=10
     elif view == 'China':
         df = df_china
         df = world_map_processing(df, date_index)
         scope='asia'
         projection_type='natural earth'
+        sizeref=3
     else:
         df = data
         df = world_map_processing(df, date_index)
         scope='world'
         projection_type='natural earth',
+        sizeref=10
     return {
             'data': [
                 go.Scattergeo(
@@ -396,7 +401,7 @@ def world_map_active(view, date_index):
                         autocolorscale = False,
                         symbol = 'circle',
                         size = np.sqrt(df['Confirmed']),
-                        sizeref = 2 if view == 'United States' else 5,
+                        sizeref = sizeref,
                         sizemin = 0,
                         line = dict(width=.5, color='rgba(0, 0, 0)'),
                         colorscale = 'Reds',
@@ -450,10 +455,10 @@ def world_map_processing(df, date_index):
     df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Longitude'] = -98.555759
 
     df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Latitude'] = 46.2276
-    df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Longitude'] = -3.4360
+    df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Longitude'] = 2.2137
 
     df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Latitude'] = 55.3781
-    df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Longitude'] = 2.2137
+    df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Longitude'] = -3.4360
 
     df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Latitude'] = 56.2639
     df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Longitude'] = 9.5018
@@ -664,7 +669,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
         ),
 
-    html.Div(dcc.Graph(id='world_map_active'),
+    html.Div(dcc.Graph(id='world_map'),
         style={'width': '50%',
             'display': 'inline-block'}
         ),
