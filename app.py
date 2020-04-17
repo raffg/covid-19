@@ -687,7 +687,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                     (idx-4)%7==0 else '') for idx, date in
                     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
                     item in data['date']])))},
-                step=None,
+                step=1,
                 vertical=False,
                 updatemode='mouseup'),
             style={'width': '88.89%', 'float': 'left'}), # width = 1 - (100 - x) / x
