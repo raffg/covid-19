@@ -98,8 +98,8 @@ def confirmed(view):
                     'mode': 'number+delta',
                     'value': value,
                     'delta': {'reference': delta,
-                              'valueformat': '.2%',
-                              'relative': True,
+                              'valueformat': ',g',
+                              'relative': False,
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -135,8 +135,8 @@ def active(view):
                     'mode': 'number+delta',
                     'value': value,
                     'delta': {'reference': delta,
-                              'valueformat': '.2%',
-                              'relative': True,
+                              'valueformat': ',g',
+                              'relative': False,
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -172,8 +172,8 @@ def recovered(view):
                     'mode': 'number+delta',
                     'value': value,
                     'delta': {'reference': delta,
-                              'valueformat': '.2%',
-                              'relative': True,
+                              'valueformat': ',g',
+                              'relative': False,
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -209,8 +209,8 @@ def deaths(view):
                     'mode': 'number+delta',
                     'value': value,
                     'delta': {'reference': delta,
-                              'valueformat': '.2%',
-                              'relative': True,
+                              'valueformat': ',g',
+                              'relative': False,
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -526,7 +526,7 @@ def trajectory(view, date_index):
     for country in countries:
         filtered_df = df[df['Country/Region'] == country].reset_index()
         idx = filtered_df['Confirmed'].sub(threshold).gt(0).idxmax()
-        trace_data = filtered_df[idx:]
+        trace_data = filtered_df[idx:].copy()
         trace_data['date'] = pd.to_datetime(trace_data['date'])
         trace_data['date'] = trace_data['date'].dt.strftime('%b %d, %Y')
 
