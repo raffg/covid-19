@@ -25,9 +25,9 @@ There are five main components of the dashboard: the indicators, the infections 
 
 ![indicators](images/indicators.png)
 
-There are four indicators, each consisting of the current value for the indicator, in red, and a percent change from yesterday, in green.
+There are four indicators, each consisting of the current value for the indicator, in red, and the change from yesterday, in blue for increasing values and green for decreasing.
 
-- **CUMULATIVE CONFIRMED** is the running total of all cases tested and confirmed in the selected region.
+- **CUMULATIVE CONFIRMED** is the running total of all cases tested and confirmed in the selected region. *(Note: This value is highly dependent upon the testing rate and almost certainly is an underestimate of actual infections.)*
 - **CURRENTLY ACTIVE** measures only the cases active today.  
 It is calculated as `ACTIVE = CONFIRMED - DEATHS - RECOVERED`
 - **DEATHS TO DATE** measures the running total of all COVID-19-related deaths
@@ -43,9 +43,9 @@ The infections chart displays the totals for `CONFIRMED`, `ACTIVE`, `RECOVERED`,
 
 ![cases](images/cases.png)
 
-The cases  graphic displays a line chart by sub-region of either `CONFIRMED`, `ACTIVE`, `RECOVERED`, or `DEATHS`, selectable with the radio buttons below the chart. If the selected region is `Worldwide` or `Europe`, the sub-regions displayed are countries. If the selected region is `United Sates`, the sub-regions are the states. On hover, the exact count of the selected metric is displayed for the sub-region the mouse is over.
+The cases  graphic displays a line chart by sub-region of either `CONFIRMED`, `ACTIVE`, `RECOVERED`, or `DEATHS`, selectable with the radio buttons below the chart. If the selected region is `Worldwide` or `Europe`, the sub-regions displayed are countries. If the selected region is `United Sates` or `China`, the sub-regions are the states or provinces. On hover, the exact count of the selected metric is displayed for the sub-region the mouse is over.
 
-By default, it displays sub-regions which were of particular interest when this dashboard was created. The dropdown-bar on the bottom allows you to select different sub-regions for display, either countries for the `Worldwide` and `Europe` focus or states for the `United States` focus. Typing in the dropdown-bar will allow you to search for sub-regions.
+By default, it displays sub-regions which were of particular interest when this dashboard was created. The dropdown-bar on the bottom allows you to select different sub-regions for display, either countries for the `Worldwide` or `Europe` focus or states/provinces for the `United States` or `China` focus. Typing in the dropdown-bar will allow you to search for sub-regions.
 
 As with the other two line charts on this dashboard, clicking on an item in the legend will temporarily remove that item from the chart. Clicking again will add it back. Double-clicking an item will remove all other items and isolate that singular item on the chart. Double-clicking again will add back all items.
 
@@ -55,10 +55,10 @@ As with the other two line charts on this dashboard, clicking on an item in the 
 
 The infection map features a circular marker over each sub-region. The size of the marker is relative to the square root of the `CONFIRMED` cases within that sub-region and the color indicates the percentage of those cases which were newly confirmed within the previous 7 days. Essentially, the size of the marker is a measure of how many people have caught the virus within that sub-region since the outbreak began and the color is a measure of how active the virus currently is, with dark red indicating the virus is actively spreading and white indicating that it is more under control. Hovering over a marker will reveal the country name and the exact value of the two measures. As with the other charts, the map is zoomable and dragable. Below the chart is a slider bar controlling the date at which the map displays data. By default it is set for the most recent date available but by dragging to the left you can see the spread of the pandemic through time.
 
-If `United States` is selected as the focus of the dashboard, each state will have its own marker for `CONFIRMED` cases, only up until March 22nd. At this point, John Hopkins began to provide data aggregated to the county-level, and I have followed suit from this date onward. This provides a much more informative and granular view of the data, however the cost is dashboard performance. Unfortunately, rendering this 60x-increase in markers slows the dashboard down but I accepted this tradeoff for the additional insight provided.
+If `United States` is selected as the focus of the dashboard, each state will have its own marker for `CONFIRMED` cases, only up until March 22nd. At this point, John Hopkins University began to provide data aggregated to the county-level, and I have followed suit from this date onward. This provides a much more informative and granular view of the data, however the cost is dashboard performance. Unfortunately, rendering this 60x-increase in markers slows the dashboard down but I accepted this tradeoff for the additional insight provided.
 
 ### Trajectory
 
 ![trajectory](images/trajectory.png)
 
-This chart displays the trajectory of the pandemic within sub-regions. The x-axis displays the cumulative confirmed count by sub-region and the y-axis displays the count of cases which were confirmed in the previous week. With this visualization, once a sub-region has managed to control the pandemic to some extent, the line should suddenly drop down, as China (green) and South Korea (orange) have in the image. Although `date` is not on either of the axes, the data is still plotted by date; hovering over any line will display the date on which that data point was recorded. Additionally, the date slider on the bottom also controls this chart; so along with the map, the change throughout time of the trajectories can be inspected.
+This chart displays the trajectory of the pandemic within sub-regions. The x-axis displays the cumulative confirmed count by sub-region and the y-axis displays the count of cases which were confirmed in the previous week. With this visualization, once a sub-region has managed to control the pandemic to some extent, the line should suddenly drop down, as China (green) and South Korea (orange) have in the image. Although `date` is not on either of the axes, the data is still plotted by date; hovering over any line will display the date on which that data point was recorded. Additionally, the date slider on the bottom also controls this chart; so along with the map, the progress throughout time of the trajectories can be inspected.

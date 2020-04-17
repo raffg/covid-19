@@ -5,11 +5,6 @@ from dash.dependencies import Input, Output
 
 import pandas as pd
 import numpy as np
-import glob
-import re
-from datetime import date, timedelta
-import io
-import requests
 
 import plotly.graph_objects as go
 
@@ -29,7 +24,9 @@ dash_colors = {
     'background': '#111111',
     'text': '#BEBEBE',
     'grid': '#333333',
-    'red': '#BF0000'
+    'red': '#BF0000',
+    'blue': '#466fc2',
+    'green': '#5bc246'
 }
 
 available_countries = sorted(data['Country/Region'].unique())
@@ -100,6 +97,8 @@ def confirmed(view):
                     'delta': {'reference': delta,
                               'valueformat': ',g',
                               'relative': False,
+                              'increasing': {'color': dash_colors['blue']},
+                              'decreasing': {'color': dash_colors['green']},
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -137,6 +136,8 @@ def active(view):
                     'delta': {'reference': delta,
                               'valueformat': ',g',
                               'relative': False,
+                              'increasing': {'color': dash_colors['blue']},
+                              'decreasing': {'color': dash_colors['green']},
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -174,6 +175,8 @@ def recovered(view):
                     'delta': {'reference': delta,
                               'valueformat': ',g',
                               'relative': False,
+                              'increasing': {'color': dash_colors['blue']},
+                              'decreasing': {'color': dash_colors['green']},
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
@@ -211,6 +214,8 @@ def deaths(view):
                     'delta': {'reference': delta,
                               'valueformat': ',g',
                               'relative': False,
+                              'increasing': {'color': dash_colors['blue']},
+                              'decreasing': {'color': dash_colors['green']},
                               'font': {'size': 25}},
                     'number': {'valueformat': ',',
                               'font': {'size': 50}},
