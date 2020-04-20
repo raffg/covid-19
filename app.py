@@ -292,7 +292,7 @@ def set_countries_value(view, available_options):
     if view == 'Worldwide':
         return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany', 'Iran']
     elif view == 'United States':
-        return ['New York', 'Washington', 'California', 'Florida', 'Michigan', 'Louisiana']
+        return ['New York', 'New Jersey', 'Massachusetts', 'Pennsylvania', 'California', 'Florida', 'Michigan', 'Louisiana', 'Washington']
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
     elif view == 'China':
