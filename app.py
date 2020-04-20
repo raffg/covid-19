@@ -582,7 +582,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         'color': dash_colors['text']
         }),
     
-    html.Div(children='Select focus for the dashboard', style={
+    html.Div(children='Select focus for the dashboard:', style={
         'textAlign': 'center',
         'color': dash_colors['text']
         }),
