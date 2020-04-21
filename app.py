@@ -247,21 +247,25 @@ def worldwide_trend(view):
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Confirmed'].sum(),
+                    hovertemplate='%{y:,g}',
                     name="Confirmed",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Active'].sum(),
+                    hovertemplate='%{y:,g}',
                     name="Active",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Recovered'].sum(),
+                    hovertemplate='%{y:,g}',
                     name="Recovered",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=df.groupby('date')['Deaths'].sum(),
+                    hovertemplate='%{y:,g}',
                     name="Deaths",
                     mode='lines')]
     return {
@@ -324,16 +328,16 @@ def active_countries(view, countries, column):
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == country].groupby('date')['date'].first(),
                     y=df[df['Country/Region'] == country].groupby('date')[column].sum(),
+                    hovertemplate='%{y:,g}<br>%{x}',
                     name=country,
-                    mode='lines',
-                    hoverinfo='x+y+name'))
+                    mode='lines'))
     if column == 'Recovered':
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
                     y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
+                    hovertemplate='%{y:,g}<br>%{x}',
                     name='Unidentified',
-                    mode='lines',
-                    hoverinfo='x+y+name'))
+                    mode='lines'))
     return {
             'data': traces,
             'layout': go.Layout(
@@ -546,7 +550,7 @@ def trajectory(view, date_index):
                     marker=dict(size=marker_size, line=dict(width=0)),
                     name=country,
                     text=trace_data['date'],
-                    hoverinfo='x+text+name')
+                    hovertemplate='%{x:,g}<br>%{text}')
         )
 
     return {
