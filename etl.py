@@ -10,7 +10,7 @@ import requests
 def etl(source='web'):
     if source=='folder':
         # Load files from folder
-        path = 'data'
+        path = 'data/raw'
         all_files = glob.glob(path + "/*.csv")
 
         files = []
@@ -42,7 +42,7 @@ def etl(source='web'):
             raw_string = requests.get(url).content
             df = pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
             if b'404: Not Found' not in raw_string:
-                df.to_csv('data/{}.csv'.format(file), index=False)
+                df.to_csv('data/raw/{}.csv'.format(file), index=False)
                 print(file)
             df['date'] = pd.to_datetime(file)
             df.rename(columns={'Province_State': 'Province/State',
@@ -282,7 +282,7 @@ def china(data):
     return df_china
 
 def us_county():
-    path = 'data'
+    path = 'data/raw'
     all_files = glob.glob(path + "/*.csv")
 
     files = []
@@ -321,7 +321,7 @@ def us_county():
     df2 = df[df['date'] > '2020-03-28'].copy()
 
     # Collect state-level data from the day prior
-    prev = pd.read_csv('data/03-21-2020.csv')
+    prev = pd.read_csv('data/raw/03-21-2020.csv')
     prev = prev[prev['Country/Region'] == 'US']
 
     # Calculate share_of_last_week as the same for each county in the state, for the first week of availability
@@ -363,14 +363,14 @@ def us_county():
                        'Long_': 'Longitude'}, inplace=True)
 
     # Add in all data prior to county availability
-    df2 = pd.read_csv('dashboard_data.csv')
+    df2 = pd.read_csv('data/dashboard_data.csv')
     df2 = df2[(df2['date'] < '2020-03-22') & (df2['Country/Region'] == 'US')]
     df2 = df2.groupby(['date', 'Province/State'], as_index=False).agg({'Country/Region': 'first',
                                                              'Confirmed': 'sum',
                                                              'Deaths': 'sum',
                                                              'Recovered': 'sum',
                                                              'Active': 'sum'})
-    df2 = df2.merge(pd.read_csv('geo_us.csv'), left_on='Province/State', right_on='Province/State')
+    df2 = df2.merge(pd.read_csv('data/geo_us.csv'), left_on='Province/State', right_on='Province/State')
     df2 = df2.merge(df2.groupby(['date', 'Province/State'], as_index=False).agg({'Confirmed': 'sum'}),
                 on=['date', 'Province/State'])
     df2['prev_value'] = df2.groupby(['Province/State'])['Confirmed_y'].shift(7, fill_value=0)
@@ -386,16 +386,16 @@ def us_county():
 
 if __name__ == '__main__':
     data = etl()
-    data.to_csv('dashboard_data.csv', index=False)
+    data.to_csv('data/dashboard_data.csv', index=False)
 
     df_us = us(data)
-    df_us.to_csv('df_us.csv', index=False)
+    df_us.to_csv('data/df_us.csv', index=False)
 
     df_eu = eu(data)
-    df_eu.to_csv('df_eu.csv', index=False)
+    df_eu.to_csv('data/df_eu.csv', index=False)
 
     df_china = china(data)
-    df_china.to_csv('df_china.csv', index=False)
+    df_china.to_csv('data/df_china.csv', index=False)
 
     df_us_county = us_county()
-    df_us_county.to_csv('df_us_county.csv', index=False)
+    df_us_county.to_csv('data/df_us_county.csv', index=False)

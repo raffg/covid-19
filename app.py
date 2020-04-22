@@ -14,11 +14,11 @@ server = app.server
 app.config.suppress_callback_exceptions=True
 app.title = 'COVID-19'
 
-data = pd.read_csv('dashboard_data.csv')
+data = pd.read_csv('data/dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
 update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
 
-geo_us = pd.read_csv('geo_us.csv')
+geo_us = pd.read_csv('data/geo_us.csv')
 
 dash_colors = {
     'background': '#111111',
@@ -66,10 +66,10 @@ region_options = {'Worldwide': available_countries,
                   'Europe': eu,
                   'China': china}
 
-df_us = pd.read_csv('df_us.csv')
-df_eu = pd.read_csv('df_eu.csv')
-df_china = pd.read_csv('df_china.csv')
-df_us_counties = pd.read_csv('df_us_county.csv')
+df_us = pd.read_csv('data/df_us.csv')
+df_eu = pd.read_csv('data/df_eu.csv')
+df_china = pd.read_csv('data/df_china.csv')
+df_us_counties = pd.read_csv('data/df_us_county.csv')
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
 df_us_counties['key'] = df_us_counties['key'].astype(str)
 
