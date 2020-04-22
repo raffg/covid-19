@@ -66,8 +66,7 @@ region_options = {'Worldwide': available_countries,
                   'Europe': eu,
                   'China': china}
 
-df_us = pd.read_csv('data/df_us.csv')  # includes only states
-df_us_full = data[data['Country/Region'] == 'US']  # includes territories, etc.
+df_us = pd.read_csv('data/df_us.csv')
 df_eu = pd.read_csv('data/df_eu.csv')
 df_china = pd.read_csv('data/df_china.csv')
 df_us_counties = pd.read_csv('data/df_us_county.csv')
@@ -84,7 +83,7 @@ def confirmed(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -126,7 +125,7 @@ def active(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -168,7 +167,7 @@ def recovered(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -210,7 +209,7 @@ def deaths(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -252,7 +251,7 @@ def worldwide_trend(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
