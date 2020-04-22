@@ -699,7 +699,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
     html.Div(dcc.Markdown(' '),
         style={
             'textAlign': 'center',
-            'color': '#FEFEFE',
+            'color': dash_colors['text'],
             'width': '100%',
             'float': 'center',
             'display': 'inline-block'}),
@@ -711,7 +711,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             '''),
             style={
                 'textAlign': 'center',
-                'color': '#FEFEFE',
+                'color': dash_colors['text'],
                 'width': '100%',
                 'float': 'center',
                 'display': 'inline-block'}
