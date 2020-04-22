@@ -8,25 +8,7 @@ import requests
 
 
 def etl(source='web'):
-    if source=='folder':
-        # Load files from folder
-        path = 'data/raw'
-        all_files = glob.glob(path + "/*.csv")
-
-        files = []
-
-        for filename in all_files:
-            file = re.search(r'([0-9]{2}\-[0-9]{2}\-[0-9]{4})', filename)[0]
-            print(file)
-            df = pd.read_csv(filename, index_col=None, header=0)
-            df['date'] = pd.to_datetime(file)
-            df.rename(columns={'Province_State': 'Province/State',
-                               'Country_Region': 'Country/Region',
-                               'Lat': 'Latitude',
-                               'Long_': 'Longitude'}, inplace=True)
-            files.append(df)
-
-    elif source=='web':
+    if source=='web':
         # Load files from web
         file_date = date(2020, 1, 22)
         dates = []
@@ -51,6 +33,24 @@ def etl(source='web'):
                                'Long_': 'Longitude'}, inplace=True)
             files.append(df)
 
+    elif source=='folder':
+        # Load files from folder
+        path = 'data/raw'
+        all_files = glob.glob(path + "/*.csv")
+
+        files = []
+
+        for filename in all_files:
+            file = re.search(r'([0-9]{2}\-[0-9]{2}\-[0-9]{4})', filename)[0]
+            print(file)
+            df = pd.read_csv(filename, index_col=None, header=0)
+            df['date'] = pd.to_datetime(file)
+            df.rename(columns={'Province_State': 'Province/State',
+                               'Country_Region': 'Country/Region',
+                               'Lat': 'Latitude',
+                               'Long_': 'Longitude'}, inplace=True)
+            files.append(df)
+
     df = pd.concat(files, axis=0, ignore_index=True, sort=False)
 
     # Rename countries with duplicate naming conventions
@@ -68,7 +68,7 @@ def etl(source='web'):
     df['Country/Region'].replace('Czechia', 'Czech Republic', inplace=True)
     df['Country/Region'].replace('Congo (Kinshasa)', 'Congo', inplace=True)
     df['Country/Region'].replace('Northern Ireland', 'United Kingdom', inplace=True)
-    df['Country/Region'].replace('Republic of Korea', 'North Korea', inplace=True)
+    df['Country/Region'].replace('Republic of Korea', 'South Korea', inplace=True)
     df['Country/Region'].replace('Congo (Brazzaville)', 'Congo', inplace=True)
     df['Country/Region'].replace('Taipei and environs', 'Taiwan', inplace=True)
     df['Country/Region'].replace('Others', 'Cruise Ship', inplace=True)
@@ -212,9 +212,6 @@ def etl(source='web'):
     df['Province/State'].replace('Johnson County, KS', 'Kansas', inplace=True)
     df['Province/State'].replace('Washington, D.C.', 'District of Columbia', inplace=True)
 
-    # South Korea data on March 10 seems to be mislabled as North Korea
-    df.loc[(df['Country/Region'] == 'North Korea') & (df['date'] == '03-10-2020'), 'Country/Region'] = 'South Korea'
-
     # Re-order the columns for readability
     df = df[['date',
             'Country/Region',
@@ -238,25 +235,32 @@ def etl(source='web'):
 
 def us(data):
     states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-        'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida',
-        'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky',
-        'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
-        'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico',
-        'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
-        'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-        'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming', 'Recovered']
+          'Colorado', 'Connecticut', 'Delaware', 'District of Columbia',
+          'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana',
+          'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland',
+          'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+          'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+          'New Jersey', 'New Mexico', 'New York', 'North Carolina',
+          'North Dakota', 'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania',
+          'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee',
+          'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+          'West Virginia', 'Wisconsin', 'Wyoming', 'Recovered']
     df_us = data[data['Province/State'].isin(states)]
     df_us = df_us.drop('Country/Region', axis=1)
     df_us = df_us.rename(columns={'Province/State': 'Country/Region'})
     return df_us
 
 def eu(data):
-    eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
-        'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
-        'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy', 'Kosovo', 'Latvia', 'Liechtenstein',
-        'Lithuania', 'Luxembourg', 'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands', 'North Macedonia', 'Norway',
-        'Poland', 'Portugal', 'Romania', 'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
-        'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom', 'Vatican City']
+    eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium',
+      'Bosnia and Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus',
+      'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
+      'Germany', 'Greece', 'Hungary', 'Iceland', 'Ireland', 'Italy',
+      'Kosovo', 'Latvia', 'Liechtenstein', 'Lithuania', 'Luxembourg',
+      'Malta', 'Moldova', 'Monaco', 'Montenegro', 'Netherlands',
+      'North Macedonia', 'Norway', 'Poland', 'Portugal', 'Romania',
+      'San Marino', 'Serbia', 'Slovakia', 'Slovenia', 'Spain', 'Sweden',
+      'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom',
+      'Vatican City']
     df_eu = data[data['Country/Region'].isin(eu)]
     df_eu = df_eu.append(pd.DataFrame({'date': [pd.to_datetime('2020-01-22'), pd.to_datetime('2020-01-23')],
                             'Country/Region': ['France', 'France'],
@@ -271,11 +275,11 @@ def eu(data):
 
 def china(data):
     provinces = ['Anhui', 'Beijing', 'Chongqing', 'Fujian', 'Gansu', 'Guangdong',
-       'Guangxi', 'Guizhou', 'Hainan', 'Hebei', 'Heilongjiang', 'Henan',
-       'Hubei', 'Hunan', 'Inner Mongolia', 'Jiangsu', 'Jiangxi', 'Jilin',
-       'Liaoning', 'Ningxia', 'Qinghai', 'Shaanxi', 'Shandong',
-       'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin', 'Tibet', 'Xinjiang',
-       'Yunnan', 'Zhejiang', 'Hong Kong', 'Macau']
+         'Guangxi', 'Guizhou', 'Hainan', 'Hebei', 'Heilongjiang', 'Henan',
+         'Hong Kong', 'Hubei', 'Hunan', 'Inner Mongolia', 'Jiangsu',
+         'Jiangxi', 'Jilin', 'Liaoning', 'Macau', 'Ningxia', 'Qinghai',
+         'Shaanxi', 'Shandong', 'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin',
+         'Tibet', 'Xinjiang', 'Yunnan', 'Zhejiang']
     df_china = data[data['Province/State'].isin(provinces)]
     df_china = df_china.drop('Country/Region', axis=1)
     df_china = df_china.rename(columns={'Province/State': 'Country/Region'})
