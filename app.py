@@ -11,14 +11,14 @@ import plotly.graph_objects as go
 
 app = dash.Dash(__name__)
 server = app.server
-app.config.suppress_callback_exceptions=True
+app.config.suppress_callback_exceptions = True
 app.title = 'COVID-19'
 
 data = pd.read_csv('data/dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
-update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
 
-geo_us = pd.read_csv('data/geo_us.csv')
+# selects the "data last updated" date
+update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
 
 dash_colors = {
     'background': '#111111',
@@ -66,7 +66,8 @@ region_options = {'Worldwide': available_countries,
                   'Europe': eu,
                   'China': china}
 
-df_us = pd.read_csv('data/df_us.csv')
+df_us = pd.read_csv('data/df_us.csv')  # includes only states
+df_us_full = data[data['Country/Region'] == 'US']  # includes territories, etc.
 df_eu = pd.read_csv('data/df_eu.csv')
 df_china = pd.read_csv('data/df_china.csv')
 df_us_counties = pd.read_csv('data/df_us_county.csv')
@@ -77,10 +78,13 @@ df_us_counties['key'] = df_us_counties['key'].astype(str)
     Output('confirmed_ind', 'figure'),
     [Input('global_format', 'value')])
 def confirmed(view):
+    '''
+    creates the CUMULATIVE CONFIRMED indicator
+    '''
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -116,10 +120,13 @@ def confirmed(view):
     Output('active_ind', 'figure'),
     [Input('global_format', 'value')])
 def active(view):
+    '''
+    creates the CURRENTLY ACTIVE indicator
+    '''
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -155,10 +162,13 @@ def active(view):
     Output('recovered_ind', 'figure'),
     [Input('global_format', 'value')])
 def recovered(view):
+    '''
+    creates the RECOVERED CASES indicator
+    '''
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -194,10 +204,13 @@ def recovered(view):
     Output('deaths_ind', 'figure'),
     [Input('global_format', 'value')])
 def deaths(view):
+    '''
+    creates the DEATHS TO DATE indicator
+    '''
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -233,10 +246,13 @@ def deaths(view):
     Output('worldwide_trend', 'figure'),
     [Input('global_format', 'value')])
 def worldwide_trend(view):
+    '''
+    creates the upper-left chart (aggregated stats for the view)
+    '''
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -286,6 +302,9 @@ def worldwide_trend(view):
     Output('country_select', 'options'),
     [Input('global_format', 'value')])
 def set_active_options(selected_view):
+    '''
+    sets allowable options for regions in the upper-right chart drop-down
+    '''
     return [{'label': i, 'value': i} for i in region_options[selected_view]]
 
 @app.callback(
@@ -293,6 +312,9 @@ def set_active_options(selected_view):
     [Input('global_format', 'value'),
      Input('country_select', 'options')])
 def set_countries_value(view, available_options):
+    '''
+    sets default selections for regions in the upper-right chart drop-down
+    '''
     if view == 'Worldwide':
         return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany', 'Iran']
     elif view == 'United States':
@@ -310,6 +332,9 @@ def set_countries_value(view, available_options):
      Input('country_select', 'value'),
      Input('column_select', 'value')])
 def active_countries(view, countries, column):
+    '''
+    creates the upper-right chart (sub-region analysis)
+    '''
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
@@ -358,6 +383,9 @@ def active_countries(view, countries, column):
     [Input('global_format', 'value'),
      Input('date_slider', 'value')])
 def world_map(view, date_index):
+    '''
+    creates the lower-left chart (map)
+    '''
     if view == 'Worldwide':
         df = data
         df = world_map_processing(df, date_index)
@@ -434,6 +462,12 @@ def world_map(view, date_index):
         }
 
 def world_map_processing(df, date_index):
+    '''
+    Create share_of_last_week and percentage columns for non-US views.
+    For the US, these columns are created in etl.py when processing data
+    at the county-level due to JHU changing data granularity during the
+    reporting period.
+    '''
     # World map
     date = df['date'].unique()[date_index]
 
@@ -482,6 +516,9 @@ def world_map_processing(df, date_index):
     [Input('global_format', 'value'),
      Input('date_slider', 'value')])
 def trajectory(view, date_index):
+    '''
+    creates the lower-right chart (trajectory)
+    '''
     if view == 'Worldwide':
         df = data
         scope = 'countries'
