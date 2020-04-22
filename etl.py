@@ -250,6 +250,14 @@ def us(data):
     df_us = df_us.rename(columns={'Province/State': 'Country/Region'})
     return df_us
 
+def cn(data):
+    states = ['Alberta','BC','Manitoba','NL','NWT','New Brunswick','Nova Scotia','Ontario',
+            'PEI','Quebec','Repatriated','Saskatchewan','Yukon']
+    df_cn = data[data['Province/State'].isin(states)]
+    df_cn = df_cn.drop('Country/Region', axis=1)
+    df_cn = df_cn.rename(columns={'Province/State': 'Country/Region'})
+    return df_cn
+
 def eu(data):
     eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium', 'Bosnia and Herzegovina',
         'Bulgaria', 'Croatia', 'Cyprus', 'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
@@ -390,6 +398,9 @@ if __name__ == '__main__':
 
     df_us = us(data)
     df_us.to_csv('df_us.csv', index=False)
+
+    df_cn = cn(data)
+    df_cn.to_csv('df_cn.csv', index=False)
 
     df_eu = eu(data)
     df_eu.to_csv('df_eu.csv', index=False)

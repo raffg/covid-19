@@ -20,6 +20,8 @@ update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
 
 geo_us = pd.read_csv('geo_us.csv')
 
+#d3d3de
+#111111
 dash_colors = {
     'background': '#111111',
     'text': '#BEBEBE',
@@ -61,12 +63,17 @@ china = ['Anhui', 'Beijing', 'Chongqing', 'Fujian', 'Gansu', 'Guangdong',
          'Shaanxi', 'Shandong', 'Shanghai', 'Shanxi', 'Sichuan', 'Tianjin',
          'Tibet', 'Xinjiang', 'Yunnan', 'Zhejiang']
 
+Canada = ['Ontario', 'Alberta', 'Quebec', 'New Brunswick', 'Manitoba',
+           'Saskatchewan', 'Nova Scotia', 'Yukon']        
+
 region_options = {'Worldwide': available_countries,
                   'United States': states,
+                  'Canada': Canada,
                   'Europe': eu,
                   'China': china}
 
 df_us = pd.read_csv('df_us.csv')
+df_cn = pd.read_csv('df_cn.csv')
 df_eu = pd.read_csv('df_eu.csv')
 df_china = pd.read_csv('df_china.csv')
 df_us_counties = pd.read_csv('df_us_county.csv')
@@ -81,6 +88,8 @@ def confirmed(view):
         df = data
     elif view == 'United States':
         df = df_us
+    elif view == 'Canada':
+        df = df_cn    
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -120,6 +129,8 @@ def active(view):
         df = data
     elif view == 'United States':
         df = df_us
+    elif view == 'Canada':
+        df = df_cn     
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -159,6 +170,8 @@ def recovered(view):
         df = data
     elif view == 'United States':
         df = df_us
+    elif view == 'Canada':
+        df = df_cn     
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -198,6 +211,8 @@ def deaths(view):
         df = data
     elif view == 'United States':
         df = df_us
+    elif view == 'Canada':
+        df = df_cn     
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -237,6 +252,8 @@ def worldwide_trend(view):
         df = data
     elif view == 'United States':
         df = df_us
+    elif view == 'Canada':
+        df = df_cn     
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -297,6 +314,8 @@ def set_countries_value(view, available_options):
         return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany', 'Iran']
     elif view == 'United States':
         return ['New York', 'New Jersey', 'Massachusetts', 'Pennsylvania', 'California', 'Florida', 'Michigan', 'Louisiana', 'Washington']
+    elif view == 'Canada':
+        return ['Alberta','BC','Manitoba','NL','NWT','New Brunswick','Nova Scotia','Ontario','PEI','Quebec','Repatriated','Saskatchewan','Yukon'] 
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
     elif view == 'China':
@@ -314,6 +333,8 @@ def active_countries(view, countries, column):
         df = data
     elif view == 'United States':
         df = df_us
+    elif view == 'Canada':
+        df = df_cn    
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -371,6 +392,11 @@ def world_map(view, date_index):
         df = df[df['date'] == df['date'].unique()[date_index]]
         df = df.rename(columns={'key': 'Country/Region'})
         sizeref=3
+    elif view == 'Canada':
+        scope = 'canada'
+        df = df_cn
+        df = world_map_processing(df, date_index)  
+        projection_type='natural earth'  
     elif view == 'Europe':
         df = df_eu
         df = world_map_processing(df, date_index)
@@ -492,6 +518,12 @@ def trajectory(view, date_index):
         df = df.rename(columns={'Province/State': 'Country/Region'})
         scope = 'states'
         threshold = 1000
+    elif view == 'Canada':
+        df = data[data['Country/Region'] == 'Canada']
+        df = df.drop('Country/Region', axis=1)
+        df = df.rename(columns={'Province/State': 'Country/Region'})
+        scope = 'countries'
+        threshold = 1000    
     elif view == 'Europe':
         df = data[data['Country/Region'].isin(eu)]
         scope = 'countries'
@@ -592,7 +624,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         }),
 
     html.Div(dcc.RadioItems(id='global_format',
-            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Europe', 'China']],
+            options=[{'label': i, 'value': i} for i in ['Worldwide', 'United States', 'Canada', 'Europe', 'China']],
             value='Worldwide',
             labelStyle={'float': 'center', 'display': 'inline-block'}
             ), style={'textAlign': 'center',
@@ -705,13 +737,14 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             'display': 'inline-block'}),
     
     html.Div(dcc.Markdown('''
-            Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
+            Modified by [Jay Patel](https://www.linkedin.com/in/patel999jay/),
+            Build by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/).
             Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)  
             Instructions and feature documention [here](https://github.com/raffg/covid-19/blob/master/README.md)  
             '''),
             style={
                 'textAlign': 'center',
-                'color': '#FEFEFE',
+                'color': '#BEBEBE',
                 'width': '100%',
                 'float': 'center',
                 'display': 'inline-block'}
