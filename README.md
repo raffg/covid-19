@@ -9,7 +9,7 @@ A web dashboard deployed on Heroku at [https://covid-19-raffg.herokuapp.com/](ht
 
  The dashboard can be set on the pandemic globally, or with a focus on either the United States, Europe, or China through the radio buttons on the top:
 
- ![focus](images/focus_select.png)
+ ![focus](images/new_focus_select.png)
 
  This button changes the underlying data for each displayed chart to reflect the selected region.
 
