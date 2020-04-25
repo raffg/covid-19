@@ -618,7 +618,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             }
         ),
 
-    html.Div(children='Data last updated {}'.format(update), style={
+    html.Div(children='Data last updated {} end-of-day'.format(update), style={
         'textAlign': 'center',
         'color': dash_colors['text']
         }),
