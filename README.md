@@ -1,5 +1,5 @@
 # COVID-19
-A web dashboard deployed on Heroku at [https://covid-19-raffg.herokuapp.com/](https://covid-19-raffg.herokuapp.com/). Built in Python and [Dash](https://dash.plot.ly/), with charts made in [Plotly](https://plot.ly/). The data is provided by [Johns Hopkins Center for Systems Science and Engineering](https://github.com/CSSEGISandData/COVID-19) and automatically updates to the dashboard nightly at 5:30pm, Pacific time.
+A web dashboard deployed on Heroku at [https://covid-19-raffg.herokuapp.com/](https://covid-19-raffg.herokuapp.com/). Built in Python and [Dash](https://dash.plot.ly/), with charts made in [Plotly](https://plot.ly/). The data is provided by [Johns Hopkins Center for Systems Science and Engineering](https://github.com/CSSEGISandData/COVID-19) and automatically updates to the dashboard nightly.
 
  ![dashboard](images/screenshot.png)
 
