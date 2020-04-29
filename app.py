@@ -740,7 +740,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             Modified by [Jay Patel](https://www.linkedin.com/in/patel999jay/),
             Build by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/).
             Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)  
-            Instructions and feature documention [here](https://github.com/raffg/covid-19/blob/master/README.md)  
+            Instructions and feature documention [here](https://github.com/patel999jay/covid-19/blob/master/README.md)  
             '''),
             style={
                 'textAlign': 'center',
