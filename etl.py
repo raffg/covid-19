@@ -7,7 +7,30 @@ import io
 import requests
 
 
-def etl(source='web'):
+def save_from_web(url):
+    url = r'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/{}'.format(url)
+    raw_string = requests.get(url).content
+    return pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
+
+def load_time_series(source='web'):
+    prepend = r'csse_covid_19_time_series/time_series_covid19_'
+    confirmed_us = save_from_web(r'{}confirmed_US.csv'.format(prepend))
+    confirmed_global = save_from_web(r'{}confirmed_global.csv'.format(prepend))
+    deaths_us = save_from_web(r'{}deaths_US.csv'.format(prepend))
+    deaths_global = save_from_web(r'{}deaths_global.csv'.format(prepend))
+    recovered_global =save_from_web(r'{}recovered_global.csv'.format(prepend))
+    df = pd.DataFrame(columns=['date',
+                               'Country/Region',
+                               'Province/State',
+                               'Confirmed',
+                               'Deaths',
+                               'Recovered',
+                               'Latitude',
+                               'Longitude'])
+
+    return df
+
+def load_daily_reports(source='web'):
     if source=='web':
         # Load files from web
         file_date = date(2020, 1, 22)
@@ -20,9 +43,8 @@ def etl(source='web'):
         files = []
         for file in dates:
             file = file.strftime("%m-%d-%Y")
-            url = r'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/{}.csv'.format(file)
-            raw_string = requests.get(url).content
-            df = pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
+            url = r'csse_covid_19_daily_reports/{}.csv'.format(file)
+            df = save_from_web(url)
             if b'404: Not Found' not in raw_string:
                 df.to_csv('data/raw/{}.csv'.format(file), index=False)
                 print(file)
@@ -50,8 +72,6 @@ def etl(source='web'):
                                'Lat': 'Latitude',
                                'Long_': 'Longitude'}, inplace=True)
             files.append(df)
-
-    df = pd.concat(files, axis=0, ignore_index=True, sort=False)
 
     # Rename countries with duplicate naming conventions
     df['Country/Region'].replace('Mainland China', 'China', inplace=True)
@@ -212,25 +232,37 @@ def etl(source='web'):
     df['Province/State'].replace('Johnson County, KS', 'Kansas', inplace=True)
     df['Province/State'].replace('Washington, D.C.', 'District of Columbia', inplace=True)
 
+    # Fill missing values as 0
+    df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
+    df['Deaths'] = df['Deaths'].fillna(0).astype(int)
+    df['Recovered'] = df['Recovered'].fillna(0).astype(int)
+
+    # Replace missing values for latitude and longitude
+    df['Latitude'] = df['Latitude'].fillna(df.groupby('Province/State')['Latitude'].transform('mean'))
+    df['Longitude'] = df['Longitude'].fillna(df.groupby('Province/State')['Longitude'].transform('mean'))
+
+    return pd.concat(files, axis=0, ignore_index=True, sort=False)
+
+def etl(source=('time_series', 'web')):
+    if source[0] == 'time_series':
+        df = load_time_series(source=source[1])
+    elif source[0] == 'daily_reports':
+        df = load_daily_reports(source=source[1])
+
+    # create Active cases column
+    df['Active'] = df['Confirmed'] - df['Deaths'] - df['Recovered']
+
     # Re-order the columns for readability
     df = df[['date',
             'Country/Region',
             'Province/State',
             'Confirmed',
+            'Active',
             'Deaths',
             'Recovered',
             'Latitude',
             'Longitude']]
 
-    # Fill missing values as 0; create Active cases column
-    df['Confirmed'] = df['Confirmed'].fillna(0).astype(int)
-    df['Deaths'] = df['Deaths'].fillna(0).astype(int)
-    df['Recovered'] = df['Recovered'].fillna(0).astype(int)
-    df['Active'] = df['Confirmed'] - df['Deaths'] - df['Recovered']
-
-    # Replace missing values for latitude and longitude
-    df['Latitude'] = df['Latitude'].fillna(df.groupby('Province/State')['Latitude'].transform('mean'))
-    df['Longitude'] = df['Longitude'].fillna(df.groupby('Province/State')['Longitude'].transform('mean'))
     return df
 
 def us(data):
