@@ -316,15 +316,15 @@ def set_countries_value(view, available_options):
     sets default selections for regions in the upper-right chart drop-down
     '''
     if view == 'Worldwide':
-        return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany', 'Iran']
+        return ['US', 'Italy', 'United Kingdom', 'Spain', 'France', 'Germany', 'Russia']
     elif view == 'United States':
-        return ['New York', 'New Jersey', 'Massachusetts', 'Pennsylvania', 'California', 'Florida', 'Michigan', 'Louisiana', 'Washington']
+        return ['New York', 'New Jersey', 'Massachusetts', 'Pennsylvania', 'California', 'Michigan', 'Washington', 'Illinois']
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
     elif view == 'China':
         return ['Hubei', 'Guangdong', 'Henan', 'Zhejiang', 'Hunan', 'Hong Kong', 'Anhui']
     else:
-        return ['China', 'Italy', 'South Korea', 'US', 'Spain', 'France', 'Germany']
+        return ['US', 'Italy', 'United Kingdom', 'Spain', 'France', 'Germany', 'Russia']
 
 @app.callback(
     Output('active_countries', 'figure'),
