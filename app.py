@@ -420,7 +420,7 @@ def world_map(view, date_index):
         scope='world'
         projection_type='natural earth',
         sizeref=10
-    df = df[df['date'] == df['date'].unique()[date_index]]
+    df = df[(df['date'] == df['date'].unique()[date_index]) & (df['Confirmed'] > 0)]
     return {
             'data': [
                 go.Scattergeo(
@@ -464,7 +464,6 @@ def world_map(view, date_index):
                 plot_bgcolor=dash_colors['background']
             )
         }
-
 
 @app.callback(
     Output('trajectory', 'figure'),
