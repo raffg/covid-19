@@ -66,13 +66,22 @@ region_options = {'Worldwide': available_countries,
                   'Europe': eu,
                   'China': china}
 
+df_worldwide = pd.read_csv('data/df_worldwide.csv')
+df_worldwide['percentage'] = df_worldwide['percentage'].astype(str)
+
 df_us = pd.read_csv('data/df_us.csv')  # includes only states
+df_us['percentage'] = df_us['percentage'].astype(str)
 df_us_full = data[data['Country/Region'] == 'US']  # includes territories, etc.
+
 df_eu = pd.read_csv('data/df_eu.csv')
+df_eu['percentage'] = df_eu['percentage'].astype(str)
+
 df_china = pd.read_csv('data/df_china.csv')
+df_china['percentage'] = df_china['percentage'].astype(str)
+
 df_us_counties = pd.read_csv('data/df_us_county.csv')
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
-df_us_counties['key'] = df_us_counties['key'].astype(str)
+df_us_counties['Country/Region'] = df_us_counties['Country/Region'].astype(str)
 
 @app.callback(
     Output('confirmed_ind', 'figure'),
@@ -387,8 +396,7 @@ def world_map(view, date_index):
     creates the lower-left chart (map)
     '''
     if view == 'Worldwide':
-        df = data
-        df = world_map_processing(df, date_index)
+        df = df_worldwide
         scope='world'
         projection_type='natural earth'
         sizeref=10
@@ -396,27 +404,23 @@ def world_map(view, date_index):
         scope='usa'
         projection_type='albers usa'
         df = df_us_counties
-        df = df[df['date'] == df['date'].unique()[date_index]]
-        df = df.rename(columns={'key': 'Country/Region'})
         sizeref=3
     elif view == 'Europe':
         df = df_eu
-        df = world_map_processing(df, date_index)
         scope='europe'
         projection_type='natural earth'
         sizeref=10
     elif view == 'China':
         df = df_china
-        df = world_map_processing(df, date_index)
         scope='asia'
         projection_type='natural earth'
         sizeref=3
     else:
-        df = data
-        df = world_map_processing(df, date_index)
+        df = df_worldwide
         scope='world'
         projection_type='natural earth',
         sizeref=10
+    df = df[df['date'] == df['date'].unique()[date_index]]
     return {
             'data': [
                 go.Scattergeo(
@@ -461,55 +465,6 @@ def world_map(view, date_index):
             )
         }
 
-def world_map_processing(df, date_index):
-    '''
-    Create share_of_last_week and percentage columns for non-US views.
-    For the US, these columns are created in etl.py when processing data
-    at the county-level due to JHU changing data granularity during the
-    reporting period.
-    '''
-    # World map
-    date = df['date'].unique()[date_index]
-
-    df_world_map = df[df['date'] == date].groupby('Country/Region').agg({'Confirmed': 'sum',
-                                                                        'Longitude': 'mean',
-                                                                        'Latitude': 'mean',
-                                                                        'Country/Region': 'first'})
-
-    if date_index > 7:
-        idx7 = date_index - 7
-    else:
-        idx7 = 0
-
-    df_world_map['share_of_last_week'] = ((df[df['date'] == date].groupby('Country/Region')['Confirmed'].sum() -
-                                df[df['date'] == df['date'].unique()[idx7]].groupby('Country/Region')['Confirmed'].sum()) /
-                                df[df['date'] == date].groupby('Country/Region')['Confirmed'].sum()) * 100
-
-    df_world_map['percentage'] = df_world_map['share_of_last_week'].fillna(0).apply(lambda x: '{:.1f}'.format(x))
-
-    # Manually change some country centroids which are mislocated due to far off colonies
-    df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Latitude'] = 39.810489
-    df_world_map.loc[df_world_map['Country/Region'] == 'US', 'Longitude'] = -98.555759
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Latitude'] = 46.2276
-    df_world_map.loc[df_world_map['Country/Region'] == 'France', 'Longitude'] = 2.2137
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Latitude'] = 55.3781
-    df_world_map.loc[df_world_map['Country/Region'] == 'United Kingdom', 'Longitude'] = -3.4360
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Latitude'] = 56.2639
-    df_world_map.loc[df_world_map['Country/Region'] == 'Denmark', 'Longitude'] = 9.5018
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Latitude'] = 52.1326
-    df_world_map.loc[df_world_map['Country/Region'] == 'Netherlands', 'Longitude'] = 5.2913
-
-    df_world_map.loc[df_world_map['Country/Region'] == 'Canada', 'Latitude'] = 59.050000
-    df_world_map.loc[df_world_map['Country/Region'] == 'Canada', 'Longitude'] = -112.833333
-
-    df_world_map = df_world_map[df_world_map['Country/Region'] != 'Cruise Ship']
-    df_world_map = df_world_map[df_world_map['Country/Region'] != 'Diamond Princess']
-
-    return df_world_map
 
 @app.callback(
     Output('trajectory', 'figure'),
