@@ -66,6 +66,7 @@ region_options = {'Worldwide': available_countries,
                   'Europe': eu,
                   'China': china}
 
+df_worldwide = pd.read_csv('data/data_worldwide.csv')
 df_us = pd.read_csv('data/df_us.csv')  # includes only states
 df_us_full = data[data['Country/Region'] == 'US']  # includes territories, etc.
 df_eu = pd.read_csv('data/df_eu.csv')
@@ -756,4 +757,4 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
