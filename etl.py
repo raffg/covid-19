@@ -147,7 +147,8 @@ def load_daily_reports(source='web'):
         for file in dates:
             file = file.strftime("%m-%d-%Y")
             url = r'csse_covid_19_daily_reports/{}.csv'.format(file)
-            df = save_from_web(url)
+            raw_string = requests.get(url).content
+            df = pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
             if b'404: Not Found' not in raw_string:
                 df.to_csv('data/raw/{}.csv'.format(file), index=False)
                 print(file)
