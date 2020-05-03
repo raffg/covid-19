@@ -116,7 +116,7 @@ def load_time_series(source='web'):
 
     df['date'] = pd.to_datetime(df['date'])
 
-    # State "Recovered" state for unassigned recoveries
+    # Create "Recovered" state for unassigned recoveries
     df.loc[(df['Country/Region'] == 'US') & (df['Recovered'].notna()), 'Province/State'] = 'Recovered'
     df.loc[df['Province/State'] == 'Recovered', 'Confirmed'] = 0
     df.loc[df['Province/State'] == 'Recovered', 'Deaths'] = 0
