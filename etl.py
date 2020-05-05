@@ -450,6 +450,26 @@ def eu(data):
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
     df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
     df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
+
+    # Manually change some country centroids which are mislocated due to far off colonies
+    df.loc[df['Country/Region'] == 'US', 'Latitude'] = 39.810489
+    df.loc[df['Country/Region'] == 'US', 'Longitude'] = -98.555759
+
+    df.loc[df['Country/Region'] == 'France', 'Latitude'] = 46.2276
+    df.loc[df['Country/Region'] == 'France', 'Longitude'] = 2.2137
+
+    df.loc[df['Country/Region'] == 'United Kingdom', 'Latitude'] = 55.3781
+    df.loc[df['Country/Region'] == 'United Kingdom', 'Longitude'] = -3.4360
+
+    df.loc[df['Country/Region'] == 'Denmark', 'Latitude'] = 56.2639
+    df.loc[df['Country/Region'] == 'Denmark', 'Longitude'] = 9.5018
+
+    df.loc[df['Country/Region'] == 'Netherlands', 'Latitude'] = 52.1326
+    df.loc[df['Country/Region'] == 'Netherlands', 'Longitude'] = 5.2913
+
+    df.loc[df['Country/Region'] == 'Canada', 'Latitude'] = 59.050000
+    df.loc[df['Country/Region'] == 'Canada', 'Longitude'] = -112.833333
+    
     return df
 
 def china(data):
