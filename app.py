@@ -93,7 +93,7 @@ def confirmed(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -135,7 +135,7 @@ def active(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -177,7 +177,7 @@ def recovered(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -219,7 +219,7 @@ def deaths(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us
+        df = df_us_full
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
