@@ -49,70 +49,203 @@ def load_time_series(source='web'):
             dates.append(column)
 
     # Melt (de-pivot), join, and union the above tables
-    df = pd.concat([
-            pd.merge(
-                pd.melt(confirmed_us,
-                    id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
-                    value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
-                                                    'Province_State': 'Province/State',
-                                                    'Lat': 'Latitude',
-                                                    'Long_': 'Longitude',
-                                                    'variable': 'date',
-                                                    'value': 'Confirmed'}),
-                pd.melt(deaths_us,
-                    id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
-                    value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
-                                                    'Province_State': 'Province/State',
-                                                    'Lat': 'Latitude',
-                                                    'Long_': 'Longitude',
-                                                    'variable': 'date',
-                                                    'value': 'Deaths'}),
-                on=['date',
+    confirmed_us_melt = pd.melt(
+        confirmed_us,
+        id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
+        value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
+                                        'Province_State': 'Province/State',
+                                        'Lat': 'Latitude',
+                                        'Long_': 'Longitude',
+                                        'variable': 'date',
+                                        'value': 'Confirmed'})
+
+    deaths_us_melt = pd.melt(
+        deaths_us,
+        id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
+        value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
+                                        'Province_State': 'Province/State',
+                                        'Lat': 'Latitude',
+                                        'Long_': 'Longitude',
+                                        'variable': 'date',
+                                        'value': 'Deaths'})
+
+    us_confirmed_deaths = pd.merge(
+        confirmed_us_melt,
+        deaths_us_melt,
+        on=['date',
+            'Country/Region',
+            'Province/State',
+            'Admin2'],
+        how='outer').assign(Recovered=np.nan).rename(columns={'Latitude_x': 'Latitude',
+                                                            'Longitude_x': 'Longitude'})[['date',
+                                               'Country/Region',
+                                               'Province/State',
+                                               'Admin2',
+                                               'Latitude',
+                                               'Longitude',
+                                               'Confirmed',
+                                               'Deaths',
+                                               'Recovered']]
+
+    confirmed_global_melt = pd.melt(
+        confirmed_global,
+        id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+        value_vars=dates).rename(columns={'Lat': 'Latitude',
+                                        'Long': 'Longitude',
+                                        'variable': 'date',
+                                        'value': 'Confirmed'}).assign(Admin2=np.nan)
+
+    # aggregate Canada confirmed because recovered is not aggregated
+    confirmed_canada = confirmed_global_melt[confirmed_global_melt['Country/Region'] == 'Canada'].groupby('date', as_index=False).agg({'Confirmed': 'sum'})
+    confirmed_canada['Country/Region'] = 'Canada'
+    confirmed_canada['Province/State'] = np.nan
+    confirmed_canada['Latitude'] = 56.1304
+    confirmed_canada['Longitude'] = -106.346800
+    confirmed_canada['Admin2'] = np.nan
+    confirmed_canada = confirmed_canada[['Country/Region', 'Province/State', 'Latitude', 'Longitude', 'date', 'Confirmed', 'Admin2']]
+
+    confirmed_global_melt = pd.concat([
+        confirmed_global_melt[confirmed_global_melt['Country/Region'] != 'Canada'],
+        confirmed_canada])
+
+    deaths_global_melt = pd.melt(deaths_global,
+        id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+        value_vars=dates).rename(columns={'Lat': 'Latitude',
+                                        'Long': 'Longitude',
+                                        'variable': 'date',
+                                        'value': 'Deaths'}).assign(Admin2=np.nan)
+
+    # aggregate Canada deaths because recovered is not aggregated
+    deaths_canada = deaths_global_melt[deaths_global_melt['Country/Region'] == 'Canada'].groupby('date', as_index=False).agg({'Deaths': 'sum'})
+    deaths_canada['Country/Region'] = 'Canada'
+    deaths_canada['Province/State'] = np.nan
+    deaths_canada['Latitude'] = 56.1304
+    deaths_canada['Longitude'] = -106.346800
+    deaths_canada['Admin2'] = np.nan
+    deaths_canada = deaths_canada[['Country/Region', 'Province/State', 'Latitude', 'Longitude', 'date', 'Deaths', 'Admin2']]
+
+    deaths_global_melt = pd.concat([
+        deaths_global_melt[deaths_global_melt['Country/Region'] != 'Canada'],
+        deaths_canada])
+
+    confirmed_deaths_global = pd.merge(
+        confirmed_global_melt,
+        deaths_global_melt,
+        on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude'],
+        how='outer')
+
+    # fix some mismatched coordinates
+    confirmed_deaths_global.loc[confirmed_deaths_global['Country/Region'] == 'Syria', ['Latitude']] = 34.802075
+    confirmed_deaths_global.loc[confirmed_deaths_global['Country/Region'] == 'Syria', ['Longitude']] = 38.996815
+    
+    confirmed_deaths_global.loc[confirmed_deaths_global['Country/Region'] == 'Mozambique', ['Latitude']] = -18.6657
+    confirmed_deaths_global.loc[confirmed_deaths_global['Country/Region'] == 'Mozambique', ['Longitude']] = 35.5296
+    
+    confirmed_deaths_global.loc[confirmed_deaths_global['Country/Region'] == 'Timor-Leste', ['Latitude']] = -8.8742
+    confirmed_deaths_global.loc[confirmed_deaths_global['Country/Region'] == 'Timor-Leste', ['Longitude']] = 125.7275
+
+    recovered_global_melt = pd.melt(
+        recovered_global,
+        id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+        value_vars=dates).rename(columns={'Lat': 'Latitude',
+                                        'Long': 'Longitude',
+                                        'variable': 'date',
+                                        'value': 'Recovered'}).assign(Admin2=np.nan)
+
+    # fix some mismatched coordinates
+    recovered_global_melt.loc[recovered_global_melt['Country/Region'] == 'Syria', ['Latitude']] = 34.802075
+    recovered_global_melt.loc[recovered_global_melt['Country/Region'] == 'Syria', ['Longitude']] = 38.996815
+    
+    recovered_global_melt.loc[recovered_global_melt['Country/Region'] == 'Mozambique', ['Latitude']] = -18.6657
+    recovered_global_melt.loc[recovered_global_melt['Country/Region'] == 'Mozambique', ['Longitude']] = 35.5296
+    
+    recovered_global_melt.loc[recovered_global_melt['Country/Region'] == 'Timor-Leste', ['Latitude']] = -8.8742
+    recovered_global_melt.loc[recovered_global_melt['Country/Region'] == 'Timor-Leste', ['Longitude']] = 125.7275
+
+    global_confirmed_deaths_recovered = pd.merge(
+        confirmed_deaths_global,
+        recovered_global_melt,
+        on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude'],
+        how='outer')[['date',
                     'Country/Region',
                     'Province/State',
                     'Admin2',
                     'Latitude',
-                    'Longitude']).assign(Recovered=np.nan)[['date',
-                                                            'Country/Region',
-                                                            'Province/State',
-                                                            'Admin2',
-                                                            'Latitude',
-                                                            'Longitude',
-                                                            'Confirmed',
-                                                            'Deaths',
-                                                            'Recovered']],
-            pd.merge(
-                pd.merge(
-                    pd.melt(confirmed_global,
-                        id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
-                        value_vars=dates).rename(columns={'Lat': 'Latitude',
-                                                        'Long': 'Longitude',
-                                                        'variable': 'date',
-                                                        'value': 'Confirmed'}).assign(Admin2=np.nan),
-                    pd.melt(deaths_global,
-                        id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
-                        value_vars=dates).rename(columns={'Lat': 'Latitude',
-                                                        'Long': 'Longitude',
-                                                        'variable': 'date',
-                                                        'value': 'Deaths'}).assign(Admin2=np.nan),
-                    on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude']),
-                pd.melt(recovered_global,
-                        id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
-                        value_vars=dates).rename(columns={'Lat': 'Latitude',
-                                                        'Long': 'Longitude',
-                                                        'variable': 'date',
-                                                        'value': 'Recovered'}).assign(Admin2=np.nan),
-                on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude']
-            )[['date',
-            'Country/Region',
-            'Province/State',
-            'Admin2',
-            'Latitude',
-            'Longitude',
-            'Confirmed',
-            'Deaths',
-            'Recovered']]
-        ])
+                    'Longitude',
+                    'Confirmed',
+                    'Deaths',
+                    'Recovered']]
+
+    df = pd.concat([
+        us_confirmed_deaths,
+        global_confirmed_deaths_recovered
+    ])
+
+
+    # df = pd.concat([
+    #         pd.merge(
+    #             pd.melt(confirmed_us,
+    #                 id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
+    #                 value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
+    #                                                 'Province_State': 'Province/State',
+    #                                                 'Lat': 'Latitude',
+    #                                                 'Long_': 'Longitude',
+    #                                                 'variable': 'date',
+    #                                                 'value': 'Confirmed'}),
+    #             pd.melt(deaths_us,
+    #                 id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
+    #                 value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
+    #                                                 'Province_State': 'Province/State',
+    #                                                 'Lat': 'Latitude',
+    #                                                 'Long_': 'Longitude',
+    #                                                 'variable': 'date',
+    #                                                 'value': 'Deaths'}),
+    #             on=['date',
+    #                 'Country/Region',
+    #                 'Province/State',
+    #                 'Admin2',
+    #                 'Latitude',
+    #                 'Longitude']).assign(Recovered=np.nan)[['date',
+    #                                                         'Country/Region',
+    #                                                         'Province/State',
+    #                                                         'Admin2',
+    #                                                         'Latitude',
+    #                                                         'Longitude',
+    #                                                         'Confirmed',
+    #                                                         'Deaths',
+    #                                                         'Recovered']],
+    #         pd.merge(
+    #             pd.merge(
+    #                 pd.melt(confirmed_global,
+    #                     id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+    #                     value_vars=dates).rename(columns={'Lat': 'Latitude',
+    #                                                     'Long': 'Longitude',
+    #                                                     'variable': 'date',
+    #                                                     'value': 'Confirmed'}).assign(Admin2=np.nan),
+    #                 pd.melt(deaths_global,
+    #                     id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+    #                     value_vars=dates).rename(columns={'Lat': 'Latitude',
+    #                                                     'Long': 'Longitude',
+    #                                                     'variable': 'date',
+    #                                                     'value': 'Deaths'}).assign(Admin2=np.nan),
+    #                 on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude']),
+    #             pd.melt(recovered_global,
+    #                     id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+    #                     value_vars=dates).rename(columns={'Lat': 'Latitude',
+    #                                                     'Long': 'Longitude',
+    #                                                     'variable': 'date',
+    #                                                     'value': 'Recovered'}).assign(Admin2=np.nan),
+    #             on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude']
+    #         )[['date',
+    #         'Country/Region',
+    #         'Province/State',
+    #         'Admin2',
+    #         'Latitude',
+    #         'Longitude',
+    #         'Confirmed',
+    #         'Deaths',
+    #         'Recovered']]
+    #     ])
 
     df['date'] = pd.to_datetime(df['date'])
 
@@ -465,8 +598,8 @@ def worldwide(data):
     df.loc[df['Country/Region'] == 'Netherlands', 'Latitude'] = 52.1326
     df.loc[df['Country/Region'] == 'Netherlands', 'Longitude'] = 5.2913
 
-    df.loc[df['Country/Region'] == 'Canada', 'Latitude'] = 59.050000
-    df.loc[df['Country/Region'] == 'Canada', 'Longitude'] = -112.833333
+    df.loc[df['Country/Region'] == 'Canada', 'Latitude'] = 56.1304
+    df.loc[df['Country/Region'] == 'Canada', 'Longitude'] = -106.346800
 
     return df
 
