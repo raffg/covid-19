@@ -37,11 +37,11 @@ def load_time_series(source='web'):
         recovered_global.to_csv('data/raw/time_series_covid19_recovered_global.csv', index=False)
 
     elif source == 'folder':
-        confirmed_us = pd.read_csv('data/raw/time_series_covid19_confirmed_US')
-        confirmed_global = pd.read_csv('data/raw/time_series_covid19_confirmed_global')
-        deaths_us = pd.read_csv('data/raw/time_series_covid19_deaths_us')
-        deaths_global = pd.read_csv('data/raw/time_series_covid19_deaths_global')
-        recovered_global = pd.read_csv('data/raw/time_series_covid19_recovered_global')
+        confirmed_us = pd.read_csv('data/raw/time_series_covid19_confirmed_US.csv')
+        confirmed_global = pd.read_csv('data/raw/time_series_covid19_confirmed_global.csv')
+        deaths_us = pd.read_csv('data/raw/time_series_covid19_deaths_us.csv')
+        deaths_global = pd.read_csv('data/raw/time_series_covid19_deaths_global.csv')
+        recovered_global = pd.read_csv('data/raw/time_series_covid19_recovered_global.csv')
 
     dates = []
     for column in confirmed_global.columns:
@@ -130,6 +130,10 @@ def load_time_series(source='web'):
     df['Active'] = df['Active'].astype(int)
 
     df = df.sort_values(by=['date', 'Country/Region', 'Province/State', 'Admin2']).reset_index(drop=True)
+
+    # Rename countries
+    df['Country/Region'].replace('Korea, South', 'South Korea', inplace=True)
+    df['Country/Region'].replace('Taiwan*', 'Taiwan', inplace=True)
 
     return df
 
