@@ -69,9 +69,8 @@ region_options = {'Worldwide': available_countries,
 df_worldwide = pd.read_csv('data/df_worldwide.csv')
 df_worldwide['percentage'] = df_worldwide['percentage'].astype(str)
 
-df_us = pd.read_csv('data/df_us.csv')  # includes only states
+df_us = pd.read_csv('data/df_us.csv')
 df_us['percentage'] = df_us['percentage'].astype(str)
-df_us_full = data[data['Country/Region'] == 'US']  # includes territories, etc.
 
 df_eu = pd.read_csv('data/df_eu.csv')
 df_eu['percentage'] = df_eu['percentage'].astype(str)
@@ -93,7 +92,7 @@ def confirmed(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -135,7 +134,7 @@ def active(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -177,7 +176,7 @@ def recovered(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -219,7 +218,7 @@ def deaths(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -261,7 +260,7 @@ def worldwide_trend(view):
     if view == 'Worldwide':
         df = data
     elif view == 'United States':
-        df = df_us_full
+        df = df_us
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
@@ -710,4 +709,4 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
