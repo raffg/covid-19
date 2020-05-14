@@ -633,34 +633,65 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             }
         ),
 
-    html.Div([html.Div(dcc.Graph(id='worldwide_trend'),
-            style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
-            ),
-        html.Div([
-            dcc.Graph(id='active_countries'),
+    html.Div(  # worldwide_trend and active_countries
+        [
             html.Div([
-                dcc.RadioItems(
-                    id='column_select',
-                    options=[{'label': i, 'value': i} for i in ['Confirmed', 'Active', 'Recovered', 'Deaths']],
-                    value='Active',
-                    labelStyle={'float': 'center', 'display': 'inline-block'},
-                    style={'textAlign': 'center',
-                        'color': dash_colors['text'],
-                        'width': '100%',
-                        'float': 'center',
-                        'display': 'inline-block'
-                        }),
-                dcc.Dropdown(
-                    id='country_select',
-                    multi=True,
-                    style={'width': '95%', 'float': 'center'}
-                    )],
-                style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
-            ],
-            style={'width': '50%', 'float': 'right', 'vertical-align': 'bottom'}
-        )],
+                dcc.Graph(id='worldwide_trend'),
+                    html.Div(dcc.Markdown('Display data in the above two charts as total values or as values relative to population:'),
+                        style={
+                            'textAlign': 'center',
+                            'color': dash_colors['text'],
+                            'width': '100%',
+                            'float': 'center',
+                            'display': 'inline-block'}),
+                html.Div(
+                    dcc.RadioItems(
+                        id='population_select',
+                        options=[{'label': i, 'value': i} for i in ['Total values', 'Values per 100,000 of population']],
+                        value='Total values',
+                        labelStyle={'float': 'center', 'display': 'inline-block'},
+                        style={'textAlign': 'center',
+                            'color': dash_colors['text'],
+                            'width': '100%',
+                            'float': 'center',
+                            'display': 'inline-block'
+                            })
+                )],
+                style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
+                ),
+            html.Div([
+                dcc.Graph(id='active_countries'),
+                html.Div([
+                    dcc.RadioItems(
+                        id='column_select',
+                        options=[{'label': i, 'value': i} for i in ['Confirmed', 'Active', 'Recovered', 'Deaths']],
+                        value='Active',
+                        labelStyle={'float': 'center', 'display': 'inline-block'},
+                        style={'textAlign': 'center',
+                            'color': dash_colors['text'],
+                            'width': '100%',
+                            'float': 'center',
+                            'display': 'inline-block'
+                            }),
+                    dcc.Dropdown(
+                        id='country_select',
+                        multi=True,
+                        style={'width': '95%', 'float': 'center'}
+                        )],
+                    style={'width': '100%', 'float': 'center', 'display': 'inline-block'})
+                ],
+                style={'width': '50%', 'float': 'right', 'vertical-align': 'bottom'}
+            )],
         style={'width': '98%', 'float': 'center', 'vertical-align': 'bottom'}
         ),
+
+    html.Div(dcc.Markdown(' '),
+        style={
+            'textAlign': 'center',
+            'color': dash_colors['text'],
+            'width': '100%',
+            'float': 'center',
+            'display': 'inline-block'}),
 
     html.Div(dcc.Graph(id='world_map'),
         style={'width': '50%',
