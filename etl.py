@@ -372,6 +372,68 @@ def etl(layout='time_series', source='web'):
             'Deaths',
             'Recovered']]
 
+    # Add population values
+
+    # source: United Nations, https://population.un.org/wpp/Download/Standard/CSV/
+    # 2019 data
+    pop_global = pd.read_csv('data/WPP2019_TotalPopulationBySex.csv')
+    pop_global = pop_global[(pop_global['Variant'] == 'Medium') & (pop_global['Time'] == 2020)][['Location', 'PopTotal']].reset_index(drop=True)
+    pop_global['population'] = pop_global['PopTotal'].astype(int) * 1000
+    pop_global['region'] = pop_global['Location']
+    pop_global = pop_global[['region', 'population']]
+
+    # source: US Census, https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+    # 2019 data projected from 2010 Census
+    pop_us = pd.read_csv('data/nst-est2019-alldata.csv')
+    pop_us = pop_us[['NAME', 'POPESTIMATE2019']]
+    pop_us['region'] = pop_us['NAME']
+    pop_us['population'] = pop_us['POPESTIMATE2019']
+    pop_us = pop_us[['region', 'population']]
+
+    # source: National Bureau of Statistics of China, http://data.stats.gov.cn/english/easyquery.htm?cn=E0103
+    # Hong Kong source: World Bank, https://data.worldbank.org/indicator/SP.POP.TOTL?locations=HK
+    # 2018 data
+    pop_china = pd.read_csv('data/AnnualbyProvince.csv', header=3, encoding='ISO-8859-1')
+    pop_china = pop_china[['Region', '2018']].iloc[:31]
+    pop_china['region'] = pop_china['Region']
+    pop_china['population'] = pop_china['2018'].astype(int) * 10000
+    pop_china = pop_china[['region', 'population']]
+    pop_china.loc[31] = ['Hong Kong', pop_global[pop_global['region'] == 'China, Hong Kong SAR']['population'].values[0]]
+
+    # Merge population data
+    df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
+    df = df.rename(columns={'population': 'pop_global'})
+    df = pd.merge(df, pop_us, left_on='Province/State', right_on='region', how='left', suffixes=('_2', '_us')).drop('region', axis=1)
+    df = df.rename(columns={'population': 'pop_us'})
+    df = pd.merge(df, pop_china, left_on='Province/State', right_on='region', how='left', suffixes=('_3', '_china')).drop('region', axis=1)
+    df = df.rename(columns={'population': 'pop_china'})
+
+    df['population'] = df['pop_global']
+    df.loc[df['pop_us'].notnull(), ['population']] = df['pop_us']
+    df.loc[df['pop_china'].notnull(), ['population']] = df['pop_china']
+    df = df.drop(['pop_global', 'pop_us', 'pop_china'], axis=1)
+
+    # Fix mismatched country names
+    df.loc[df['Country/Region'] == 'Bolivia', ['population']] = pop_global.loc[pop_global['region'] == 'Bolivia (Plurinational State of)']['population'].values
+    df.loc[df['Country/Region'] == 'Brunei', ['population']] = pop_global.loc[pop_global['region'] == 'Brunei Darussalam']['population'].values
+    df.loc[df['Country/Region'] == 'Burma', ['population']] = pop_global.loc[pop_global['region'] == 'Myanmar']['population'].values
+    df.loc[df['Country/Region'] == 'Congo (Brazzaville)', ['population']] = pop_global.loc[pop_global['region'] == 'Congo']['population'].values
+    df.loc[df['Country/Region'] == 'Congo (Kinshasa)', ['population']] = pop_global.loc[pop_global['region'] == 'Democratic Republic of the Congo']['population'].values
+    df.loc[df['Country/Region'] == "Cote d'Ivoire", ['population']] = pop_global.loc[pop_global['region'] == "Côte d'Ivoire"]['population'].values
+    df.loc[df['Country/Region'] == 'Iran', ['population']] = pop_global.loc[pop_global['region'] == 'Iran (Islamic Republic of)']['population'].values
+    df.loc[df['Country/Region'] == 'South Korea', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Korea']['population'].values
+    df.loc[df['Country/Region'] == 'Laos', ['population']] = pop_global.loc[pop_global['region'] == "Lao People's Democratic Republic"]['population'].values
+    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova']['population'].values
+    df.loc[df['Country/Region'] == 'Russia', ['population']] = pop_global.loc[pop_global['region'] == 'Russian Federation']['population'].values
+    df.loc[df['Country/Region'] == 'Taiwan', ['population']] = pop_global.loc[pop_global['region'] == 'China, Taiwan Province of China']['population'].values
+    df.loc[df['Country/Region'] == 'Tanzania', ['population']] = pop_global.loc[pop_global['region'] == 'United Republic of Tanzania']['population'].values
+    df.loc[df['Country/Region'] == 'US', ['population']] = pop_global.loc[pop_global['region'] == 'United States of America']['population'].values
+    df.loc[df['Country/Region'] == 'Venezuela', ['population']] = pop_global.loc[pop_global['region'] == 'Venezuela (Bolivarian Republic of)']['population'].values
+    df.loc[df['Country/Region'] == 'Vietnam', ['population']] = pop_global.loc[pop_global['region'] == 'Viet Nam']['population'].values
+
+    # Set population per 100,000
+    df['population'] = df['population'] / 100000
+
     return df
 
 def worldwide(data):
