@@ -252,13 +252,14 @@ def deaths(view):
 
 @app.callback(
     Output('worldwide_trend', 'figure'),
-    [Input('global_format', 'value')])
-def worldwide_trend(view):
+    [Input('global_format', 'value'),
+     Input('population_select', 'value')])
+def worldwide_trend(view, population):
     '''
     creates the upper-left chart (aggregated stats for the view)
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
     elif view == 'United States':
         df = df_us
     elif view == 'Europe':
@@ -266,36 +267,55 @@ def worldwide_trend(view):
     elif view == 'China':
         df = df_china
     else:
-        df = data
+        df = df_worldwide
+
+    if population == 'absolute':
+        confirmed = 'Confirmed'
+        active = 'Active'
+        recovered = 'Recovered'
+        deaths = 'Deaths'
+        title_suffix = ''
+    elif population == 'percent':
+        confirmed = 'Confirmed per 100,000'
+        active = 'Active per 100,000'
+        recovered = 'Recovered per 100,000'
+        deaths = 'Deaths per 100,000'
+        title_suffix = ' per 100,000 people'
+    else:
+        confirmed = 'Confirmed'
+        active = 'Active'
+        recovered = 'Recovered'
+        deaths = 'Deaths'
+        title_suffix = ''
 
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')['Confirmed'].sum(),
+                    y=df.groupby('date')[confirmed].sum(),  # y=df.groupby('date').apply(lambda row: row['Confirmed'] / row['population'])
                     hovertemplate='%{y:,g}',
                     name="Confirmed",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')['Active'].sum(),
+                    y=df.groupby('date')[active].sum(),
                     hovertemplate='%{y:,g}',
                     name="Active",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')['Recovered'].sum(),
+                    y=df.groupby('date')[recovered].sum(),
                     hovertemplate='%{y:,g}',
                     name="Recovered",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')['Deaths'].sum(),
+                    y=df.groupby('date')[deaths].sum(),
                     hovertemplate='%{y:,g}',
                     name="Deaths",
                     mode='lines')]
     return {
             'data': traces,
             'layout': go.Layout(
-                title="{} Infections".format(view),
+                title="{} Infections{}".format(view, title_suffix),
                 xaxis_title="Date",
                 yaxis_title="Number of Cases",
                 font=dict(color=dash_colors['text']),
@@ -338,13 +358,14 @@ def set_countries_value(view, available_options):
     Output('active_countries', 'figure'),
     [Input('global_format', 'value'),
      Input('country_select', 'value'),
-     Input('column_select', 'value')])
-def active_countries(view, countries, column):
+     Input('column_select', 'value'),
+     Input('population_select', 'value')])
+def active_countries(view, countries, column, population):
     '''
     creates the upper-right chart (sub-region analysis)
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
     elif view == 'United States':
         df = df_us
     elif view == 'Europe':
@@ -352,7 +373,14 @@ def active_countries(view, countries, column):
     elif view == 'China':
         df = df_china
     else:
-        df = data
+        df = df_worldwide
+
+    if population == 'absolute':
+        column = column
+    elif population == 'percent':
+        column = '{} per 100,000'.format(column)
+    else:
+        column = column
 
     traces = []
     countries = df[(df['Country/Region'].isin(countries)) &
@@ -647,8 +675,9 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                 html.Div(
                     dcc.RadioItems(
                         id='population_select',
-                        options=[{'label': i, 'value': i} for i in ['Total values', 'Values per 100,000 of population']],
-                        value='Total values',
+                        options=[{'label': 'Total values', 'value': 'absolute'},
+                                 {'label': 'Values per 100,000 of population', 'value': 'percent'}],
+                        value='absolute',
                         labelStyle={'float': 'center', 'display': 'inline-block'},
                         style={'textAlign': 'center',
                             'color': dash_colors['text'],
