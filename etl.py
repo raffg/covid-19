@@ -466,6 +466,7 @@ def etl(layout='time_series', source='web'):
     pop_china['population'] = (pop_china['2018'] * 10000).astype(int)
     pop_china = pop_china[['region', 'population']]
     pop_china.loc[31] = ['Hong Kong', pop_global[pop_global['region'] == 'China, Hong Kong SAR']['population'].values[0]]
+    pop_china.loc[32] = ['Macau', pop_global[pop_global['region'] == 'China, Macao SAR']['population'].values[0]]
 
     # Merge population data
     df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
@@ -494,76 +495,113 @@ def etl(layout='time_series', source='web'):
     df.loc[df['Country/Region'] == 'Russia', ['population']] = pop_global.loc[pop_global['region'] == 'Russian Federation']['population'].values
     df.loc[df['Country/Region'] == 'Taiwan', ['population']] = pop_global.loc[pop_global['region'] == 'China, Taiwan Province of China']['population'].values
     df.loc[df['Country/Region'] == 'Tanzania', ['population']] = pop_global.loc[pop_global['region'] == 'United Republic of Tanzania']['population'].values
-    df.loc[(df['Country/Region'] == 'US') & (df['Province/State'] == 'Recovered'), ['population']] = pop_global.loc[pop_global['region'] == 'United States of America']['population'].values
     df.loc[df['Country/Region'] == 'Venezuela', ['population']] = pop_global.loc[pop_global['region'] == 'Venezuela (Bolivarian Republic of)']['population'].values
     df.loc[df['Country/Region'] == 'Vietnam', ['population']] = pop_global.loc[pop_global['region'] == 'Viet Nam']['population'].values
     df.loc[df['Country/Region'] == 'Syria', ['population']] = pop_global.loc[pop_global['region'] == 'Syrian Arab Republic']['population'].values
+    df.loc[(df['Country/Region'] == 'US') & (df['Province/State'] == 'Recovered'), ['population']] = pop_global.loc[pop_global['region'] == 'United States of America']['population'].values
 
     # Set population per 100,000
     df['population'] = df['population'] / 100000
 
-    # Apply appropriate aggregation to population values
-    level_0 = df[~df['Country/Region'].isin(['Australia',
-                                         'China',
-                                         'Denmark',
-                                         'France',
-                                         'Netherlands',
-                                         'US',
-                                         'United Kingdom'])]
-    level_0 = level_0[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-    level_1 = df[df['Country/Region'].isin(['Australia',
-                              'Denmark',
-                              'France',
-                              'Netherlands',
-                              'United Kingdom'])].groupby(['date',
-                                                           'Country/Region'],
-                                                          as_index=False).agg({'Province/State': 'first',
-                                                                               'Admin2': 'first',
-                                                                               'Latitude': 'mean',
-                                                                               'Longitude': 'mean',
-                                                                               'population': 'first',
-                                                                               'Confirmed': 'sum',
-                                                                               'Active': 'sum',
-                                                                               'Deaths': 'sum',
-                                                                               'Recovered': 'sum'})
-    level_1 = level_1.assign(**{'Province/State': df['Province/State'].apply(lambda x: np.nan),
-                                'Admin2': df['Admin2'].apply(lambda x: np.nan)})
-    level_1 = level_1[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-    level_2 = df[df['Country/Region'].isin(['China',
-                              'US'])].groupby(['date',
-                                               'Country/Region',
-                                               'Province/State'],
-                                              as_index=False).agg({'Admin2': 'first',
-                                                                   'Latitude': 'mean',
-                                                                   'Longitude': 'mean',
-                                                                   'population': 'first',
-                                                                   'Confirmed': 'sum',
-                                                                   'Active': 'sum',
-                                                                   'Deaths': 'sum',
-                                                                   'Recovered': 'sum'})
-    level_2 = level_2.assign(**{'Admin2': df['Admin2'].apply(lambda x: np.nan)})
-    level_2 = level_2[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-    df = pd.concat([level_0, level_1, level_2]).sort_values(['date', 'Country/Region', 'Province/State'])
-
     return df
 
 def worldwide(data):
-    regions_to_drop = data[data['population'].isna()]['Country/Region'].unique()
-    data = data[~data['Country/Region'].isin(regions_to_drop)]
+    level_0 = data[~data['Country/Region'].isin(['Australia',
+                                        'China',
+                                        'Denmark',
+                                        'France',
+                                        'Netherlands',
+                                        'US',
+                                        'United Kingdom'])]
+    level_0 = level_0[['date', 'Country/Region', 'Province/State', 'Admin2',
+                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
+                    'Recovered', 'population']]
 
-    df = data.groupby(['date', 'Country/Region'], as_index=False).agg({'Latitude': 'mean',
-                                                                       'Longitude': 'mean',
-                                                                       'population': 'sum',
-                                                                       'Confirmed': 'sum',
-                                                                       'Deaths': 'sum',
-                                                                       'Recovered': 'sum',
-                                                                       'Active': 'sum'})
+    level_1 = data[data['Country/Region'].isin(['Australia',
+                            'Denmark',
+                            'France',
+                            'Netherlands',
+                            'United Kingdom'])].groupby(['date',
+                                                        'Country/Region'],
+                                                        as_index=False).agg({'Province/State': 'first',
+                                                                            'Admin2': 'first',
+                                                                            'Latitude': 'mean',
+                                                                            'Longitude': 'mean',
+                                                                            'population': 'first',
+                                                                            'Confirmed': 'sum',
+                                                                            'Active': 'sum',
+                                                                            'Deaths': 'sum',
+                                                                            'Recovered': 'sum'})
+    level_1 = level_1.assign(**{'Province/State': data['Province/State'].apply(lambda x: np.nan),
+                                'Admin2': data['Admin2'].apply(lambda x: np.nan)})
+    level_1 = level_1[['date', 'Country/Region', 'Province/State', 'Admin2',
+                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
+                    'Recovered', 'population']]
+
+    level_2 = data[data['Country/Region'] == 'China'].groupby(['date',
+                                                        'Country/Region'],
+                                                        as_index=False).agg({'Province/State': 'first',
+                                                                            'Admin2': 'first',
+                                                                            'Latitude': 'mean',
+                                                                            'Longitude': 'mean',
+                                                                            'population': 'sum',
+                                                                            'Confirmed': 'sum',
+                                                                            'Active': 'sum',
+                                                                            'Deaths': 'sum',
+                                                                            'Recovered': 'sum'})
+    level_2 = level_2.assign(**{'Province/State': data['Province/State'].apply(lambda x: np.nan),
+                                'Admin2': data['Admin2'].apply(lambda x: np.nan)})
+    level_2 = level_2[['date', 'Country/Region', 'Province/State', 'Admin2',
+                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
+                    'Recovered', 'population']]
+
+    level_3 = data[(data['Country/Region'] == 'US') & (data['Province/State'] != 'Recovered')].groupby(['date',
+                                                    'Province/State'], as_index=False).agg({'Country/Region': 'first',
+                                                                                            'Admin2': 'first',
+                                                                                            'Latitude': 'mean',
+                                                                                            'Longitude': 'mean',
+                                                                                            'population': 'first',
+                                                                                            'Confirmed': 'sum',
+                                                                                            'Active': 'sum',
+                                                                                            'Deaths': 'sum',
+                                                                                            'Recovered': 'sum'})
+
+    level_3 = level_3.groupby(['date', 'Country/Region'], as_index=False).agg({'Province/State': 'first',
+                                                                                            'Admin2': 'first',
+                                                                                            'Latitude': 'mean',
+                                                                                            'Longitude': 'mean',
+                                                                                            'population': 'sum',
+                                                                                            'Confirmed': 'sum',
+                                                                                            'Active': 'sum',
+                                                                                            'Deaths': 'sum',
+                                                                                            'Recovered': 'sum'})
+
+    level_3 = level_3.assign(**{'Province/State': data['Province/State'].apply(lambda x: np.nan),
+                                'Admin2': data['Admin2'].apply(lambda x: np.nan)})
+    level_3 = level_3[['date', 'Country/Region', 'Province/State', 'Admin2',
+                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
+                    'Recovered', 'population']]
+
+    level_3['Recovered'] = data[(data['Country/Region'] == 'US') & (data['Province/State'] == 'Recovered')].reset_index()['Recovered']
+
+    df = pd.concat([level_0,
+                    level_1,
+                    level_2,
+                    level_3]).sort_values(['date',
+                                           'Country/Region']).reset_index(drop=True)[['date',
+                                                                                    'Country/Region',
+                                                                                    'Latitude',
+                                                                                    'Longitude',
+                                                                                    'population',
+                                                                                    'Confirmed',
+                                                                                    'Active',
+                                                                                    'Deaths',
+                                                                                    'Recovered']]
+
+
+    regions_to_drop = df[df['population'].isna()]['Country/Region'].unique()
+    df = df[~df['Country/Region'].isin(regions_to_drop)]
+
     df['share_of_last_week'] = 100 * (df['Confirmed'] - df.groupby('Country/Region')['Confirmed'].shift(7, fill_value=0)) / df['Confirmed']
     df['share_of_last_week'] = df['share_of_last_week'].replace([np.inf, -np.inf], np.nan).fillna(0)
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0

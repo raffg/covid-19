@@ -270,45 +270,45 @@ def worldwide_trend(view, population):
         df = df_worldwide
 
     if population == 'absolute':
-        confirmed = 'Confirmed'
-        active = 'Active'
-        recovered = 'Recovered'
-        deaths = 'Deaths'
+        confirmed = df.groupby('date')['Confirmed'].sum()
+        active = df.groupby('date')['Active'].sum()
+        recovered = df.groupby('date')['Recovered'].sum()
+        deaths = df.groupby('date')['Deaths'].sum()
         title_suffix = ''
     elif population == 'percent':
-        confirmed = 'Confirmed per 100,000'
-        active = 'Active per 100,000'
-        recovered = 'Recovered per 100,000'
-        deaths = 'Deaths per 100,000'
+        confirmed = df.groupby('date')['Confirmed'].sum() / df.groupby('date')['population'].sum()
+        active = df.groupby('date')['Active'].sum() / df.groupby('date')['population'].sum()
+        recovered = df.groupby('date')['Recovered'].sum() / df.groupby('date')['population'].sum()
+        deaths = df.groupby('date')['Deaths'].sum() / df.groupby('date')['population'].sum()
         title_suffix = ' per 100,000 people'
     else:
-        confirmed = 'Confirmed'
-        active = 'Active'
-        recovered = 'Recovered'
-        deaths = 'Deaths'
+        confirmed = df.groupby('date')['Confirmed'].sum()
+        active = df.groupby('date')['Active'].sum()
+        recovered = df.groupby('date')['Recovered'].sum()
+        deaths = df.groupby('date')['Deaths'].sum()
         title_suffix = ''
 
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')[confirmed].sum(),  # y=df.groupby('date').apply(lambda row: row['Confirmed'] / row['population'])
+                    y=confirmed,
                     hovertemplate='%{y:,g}',
                     name="Confirmed",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')[active].sum(),
+                    y=active,
                     hovertemplate='%{y:,g}',
                     name="Active",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')[recovered].sum(),
+                    y=recovered,
                     hovertemplate='%{y:,g}',
                     name="Recovered",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
-                    y=df.groupby('date')[deaths].sum(),
+                    y=deaths,
                     hovertemplate='%{y:,g}',
                     name="Deaths",
                     mode='lines')]
