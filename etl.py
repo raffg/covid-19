@@ -48,6 +48,8 @@ def load_time_series(source='web'):
         if re.search(r'([0-9]{1,2}\/[0-9]{1,2}\/(20))', column):
             dates.append(column)
 
+    print()
+    print('Transforming data')
     # Melt (de-pivot), join, and union the above tables
     confirmed_us_melt = pd.melt(
         confirmed_us,
@@ -508,6 +510,7 @@ def etl(layout='time_series', source='web'):
     return df
 
 def worldwide(data):
+    print('processing worldwide')
     df = data.groupby(['date', 'Country/Region'], as_index=False).agg({'Latitude': 'mean',
                                                                        'Longitude': 'mean',
                                                                        'Confirmed': 'sum',
@@ -542,6 +545,7 @@ def worldwide(data):
     return df
 
 def us(data):
+    print('processing US')
     df = data[data['Country/Region'] == 'US']
     df = df.groupby(['date', 'Province/State'], as_index=False).agg({'Confirmed': 'sum',
                                                                      'Deaths': 'sum',
@@ -565,6 +569,7 @@ def us(data):
     return df
 
 def eu(data):
+    print('processing Europe')
     eu = ['Albania', 'Andorra', 'Austria', 'Belarus', 'Belgium',
       'Bosnia and Herzegovina', 'Bulgaria', 'Croatia', 'Cyprus',
       'Czech Republic', 'Denmark', 'Estonia', 'Finland', 'France',
@@ -610,6 +615,7 @@ def eu(data):
     return df
 
 def china(data):
+    print('processing China')
     df = data[data['Country/Region'] == 'China']
     df = df.drop(['Country/Region', 'Admin2'], axis=1)
     df = df.rename(columns={'Province/State': 'Country/Region'})
@@ -621,6 +627,7 @@ def china(data):
     return df
 
 def us_county(data):
+    print('processing US counties')
     df = data[data['Country/Region'] == 'US']
     df = df.assign(key=df['Admin2'] + ' County, ' + df['Province/State'])
     df = df.drop('Country/Region', axis=1)
@@ -632,20 +639,108 @@ def us_county(data):
     df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
     return df
 
+def global_population():
+    # source: United Nations, https://population.un.org/wpp/Download/Standard/CSV/
+    # 2019 data
+    print()
+    print('loading population')
+    pop_global = pd.read_csv('data/WPP2019_TotalPopulationBySex.csv')
+    pop_global = pop_global[(pop_global['Variant'] == 'Medium') & (pop_global['Time'] == 2020)][['Location', 'PopTotal']].reset_index(drop=True)
+    pop_global['population'] = (pop_global['PopTotal'] * 1000).astype(int)
+    pop_global['region'] = pop_global['Location']
+    pop_global = pop_global[['region', 'population']]
+    return pop_global
+
+def us_population():
+    # source: US Census, https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
+    # 2019 data projected from 2010 Census
+    pop_us = pd.read_csv('data/nst-est2019-alldata.csv')
+    pop_us = pop_us[['NAME', 'POPESTIMATE2019']]
+    pop_us['region'] = pop_us['NAME']
+    pop_us['population'] = pop_us['POPESTIMATE2019']
+    pop_us = pop_us[['region', 'population']]
+    return pop_us
+
+def china_population():
+    # source: National Bureau of Statistics of China, http://data.stats.gov.cn/english/easyquery.htm?cn=E0103
+    # Hong Kong source: World Bank, https://data.worldbank.org/indicator/SP.POP.TOTL?locations=HK
+    # 2018 data
+    pop_china = pd.read_csv('data/AnnualbyProvince.csv', header=3, encoding='ISO-8859-1')
+    pop_china = pop_china[['Region', '2018']].iloc[:31]
+    pop_china['region'] = pop_china['Region']
+    pop_china['population'] = (pop_china['2018'] * 10000).astype(int)
+    pop_china = pop_china[['region', 'population']]
+    pop_china.loc[31] = ['Hong Kong', pop_global[pop_global['region'] == 'China, Hong Kong SAR']['population'].values[0]]
+    pop_china.loc[32] = ['Macau', pop_global[pop_global['region'] == 'China, Macao SAR']['population'].values[0]]
+    return pop_china
+
+def population_to_worldwide(df, pop_global):
+    df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop(columns='region')
+
+    # correct mismatched country names
+    df.loc[df['Country/Region'] == 'Bolivia', ['population']] = pop_global.loc[pop_global['region'] == 'Bolivia (Plurinational State of)']['population'].values
+    df.loc[df['Country/Region'] == 'Brunei', ['population']] = pop_global.loc[pop_global['region'] == 'Brunei Darussalam']['population'].values
+    df.loc[df['Country/Region'] == 'Burma', ['population']] = pop_global.loc[pop_global['region'] == 'Myanmar']['population'].values
+    df.loc[df['Country/Region'] == 'Congo (Brazzaville)', ['population']] = pop_global.loc[pop_global['region'] == 'Congo']['population'].values
+    df.loc[df['Country/Region'] == 'Congo (Kinshasa)', ['population']] = pop_global.loc[pop_global['region'] == 'Democratic Republic of the Congo']['population'].values
+    df.loc[df['Country/Region'] == "Cote d'Ivoire", ['population']] = pop_global.loc[pop_global['region'] == "Côte d'Ivoire"]['population'].values
+    df.loc[df['Country/Region'] == 'Iran', ['population']] = pop_global.loc[pop_global['region'] == 'Iran (Islamic Republic of)']['population'].values
+    df.loc[df['Country/Region'] == 'Kosovo', ['population']] = 1845000  # source: https://data.worldbank.org/country/kosovo
+    df.loc[df['Country/Region'] == 'South Korea', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Korea']['population'].values
+    df.loc[df['Country/Region'] == 'Laos', ['population']] = pop_global.loc[pop_global['region'] == "Lao People's Democratic Republic"]['population'].values
+    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova']['population'].values
+    df.loc[df['Country/Region'] == 'Russia', ['population']] = pop_global.loc[pop_global['region'] == 'Russian Federation']['population'].values
+    df.loc[df['Country/Region'] == 'Taiwan', ['population']] = pop_global.loc[pop_global['region'] == 'China, Taiwan Province of China']['population'].values
+    df.loc[df['Country/Region'] == 'Tanzania', ['population']] = pop_global.loc[pop_global['region'] == 'United Republic of Tanzania']['population'].values
+    df.loc[df['Country/Region'] == 'Venezuela', ['population']] = pop_global.loc[pop_global['region'] == 'Venezuela (Bolivarian Republic of)']['population'].values
+    df.loc[df['Country/Region'] == 'Vietnam', ['population']] = pop_global.loc[pop_global['region'] == 'Viet Nam']['population'].values
+    df.loc[df['Country/Region'] == 'Syria', ['population']] = pop_global.loc[pop_global['region'] == 'Syrian Arab Republic']['population'].values
+    df.loc[(df['Country/Region'] == 'US'), ['population']] = pop_global.loc[pop_global['region'] == 'United States of America']['population'].values
+
+    df['population'] = df['population'] / 100000
+
+    return df
+
+def population_to_us(df, pop_us):
+    df = pd.merge(df, pop_us, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
+    df.loc[df['Country/Region'] == 'Recovered', ['population']] = pop_us[pop_us['region'] == 'United States']['population'].values[0]
+    df['population'] = df['population'] / 100000
+    return df
+
+def population_to_eu(df, pop_global):
+    df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
+    df.loc[df['Country/Region'] == 'Kosovo', ['population']] = 1845000  # source: https://data.worldbank.org/country/kosovo
+    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova']['population'].values
+    df['population'] = df['population'] / 100000
+    return df
+
+def population_to_china(df, pop_china):
+    df = pd.merge(df, pop_china, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
+    df['population'] = df['population'] / 100000
+    return df
+
 if __name__ == '__main__':
     data = etl('time_series', 'web')
     data.to_csv('data/dashboard_data.csv', index=False)
 
+    pop_global = global_population()
+    pop_us = us_population()
+    pop_china = china_population()
+
     df_worldwide = worldwide(data)
+    df_worldwide = population_to_worldwide(df_worldwide, pop_global)
     df_worldwide.to_csv('data/df_worldwide.csv', index=False)
 
     df_us = us(data)
+    df_us = population_to_us(df_us, pop_us)
     df_us.to_csv('data/df_us.csv', index=False)
 
     df_eu = eu(data)
+    df_eu = population_to_eu(df_eu, pop_global)
     df_eu.to_csv('data/df_eu.csv', index=False)
 
     df_china = china(data)
+    df_china = population_to_china(df_china, pop_china)
     df_china.to_csv('data/df_china.csv', index=False)
 
     df_us_county = us_county(data)

@@ -275,41 +275,45 @@ def worldwide_trend(view, population):
         recovered = df.groupby('date')['Recovered'].sum()
         deaths = df.groupby('date')['Deaths'].sum()
         title_suffix = ''
+        hover = '%{y:,g}'
     elif population == 'percent':
+        df = df.dropna(subset=['population'])
         confirmed = df.groupby('date')['Confirmed'].sum() / df.groupby('date')['population'].sum()
         active = df.groupby('date')['Active'].sum() / df.groupby('date')['population'].sum()
         recovered = df.groupby('date')['Recovered'].sum() / df.groupby('date')['population'].sum()
         deaths = df.groupby('date')['Deaths'].sum() / df.groupby('date')['population'].sum()
         title_suffix = ' per 100,000 people'
+        hover = '%{y:,.2f}'
     else:
         confirmed = df.groupby('date')['Confirmed'].sum()
         active = df.groupby('date')['Active'].sum()
         recovered = df.groupby('date')['Recovered'].sum()
         deaths = df.groupby('date')['Deaths'].sum()
         title_suffix = ''
+        hover = '%{y:,g}'
 
     traces = [go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=confirmed,
-                    hovertemplate='%{y:,g}',
+                    hovertemplate=hover,
                     name="Confirmed",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=active,
-                    hovertemplate='%{y:,g}',
+                    hovertemplate=hover,
                     name="Active",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=recovered,
-                    hovertemplate='%{y:,g}',
+                    hovertemplate=hover,
                     name="Recovered",
                     mode='lines'),
                 go.Scatter(
                     x=df.groupby('date')['date'].first(),
                     y=deaths,
-                    hovertemplate='%{y:,g}',
+                    hovertemplate=hover,
                     name="Deaths",
                     mode='lines')]
     return {
@@ -376,33 +380,47 @@ def active_countries(view, countries, column, population):
         df = df_worldwide
 
     if population == 'absolute':
-        column = column
+        column_label = column
+        hover = '%{y:,g}<br>%{x}'
     elif population == 'percent':
-        column = '{} per 100,000'.format(column)
+        column_label = '{} per 100,000'.format(column)
+        df = df.dropna(subset=['population'])
+        hover = '%{y:,.2f}<br>%{x}'
     else:
-        column = column
+        column_label = column
+        hover = '%{y:,g}<br>%{x}'
 
     traces = []
     countries = df[(df['Country/Region'].isin(countries)) &
                    (df['date'] == df['date'].max())].groupby('Country/Region')['Active'].sum().sort_values(ascending=False).index.to_list()
     for country in countries:
+        if population == 'absolute':
+            y_data = df[df['Country/Region'] == country].groupby('date')[column].sum()
+            recovered = df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum()
+        elif population == 'percent':
+            y_data = df[df['Country/Region'] == country].groupby('date')[column].sum() / df[df['Country/Region'] == country].groupby('date')['population'].first()
+            recovered = df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum() / df[df['Country/Region'] == country].groupby('date')['population'].first()
+        else:
+            y_data = df[df['Country/Region'] == country].groupby('date')[column].sum()
+            recovered = df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum()
+
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == country].groupby('date')['date'].first(),
-                    y=df[df['Country/Region'] == country].groupby('date')[column].sum(),
-                    hovertemplate='%{y:,g}<br>%{x}',
+                    y=y_data,
+                    hovertemplate=hover,
                     name=country,
                     mode='lines'))
     if column == 'Recovered':
         traces.append(go.Scatter(
                     x=df[df['Country/Region'] == 'Recovered'].groupby('date')['date'].first(),
-                    y=df[df['Country/Region'] == 'Recovered'].groupby('date')[column].sum(),
-                    hovertemplate='%{y:,g}<br>%{x}',
+                    y=recovered,
+                    hovertemplate=hover,
                     name='Unidentified',
                     mode='lines'))
     return {
             'data': traces,
             'layout': go.Layout(
-                    title="{} by Region".format(column),
+                    title="{} by Region".format(column_label),
                     xaxis_title="Date",
                     yaxis_title="Number of Cases",
                     font=dict(color=dash_colors['text']),
