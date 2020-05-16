@@ -679,31 +679,33 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             }
         ),
 
+    # html.Div(dcc.Markdown('')),
+
+    html.Div(dcc.Markdown('Display data in the below two charts as total values or as values relative to population:'),
+        style={
+            'textAlign': 'center',
+            'color': dash_colors['text'],
+            'width': '100%',
+            'float': 'center',
+            'display': 'inline-block'}),
+
+    html.Div(dcc.RadioItems(id='population_select',
+            options=[{'label': 'Total values', 'value': 'absolute'},
+                        {'label': 'Values per 100,000 of population', 'value': 'percent'}],
+            value='absolute',
+            labelStyle={'float': 'center', 'display': 'inline-block'},
+            style={'textAlign': 'center',
+                'color': dash_colors['text'],
+                'width': '100%',
+                'float': 'center',
+                'display': 'inline-block'
+                })
+    ),
+
     html.Div(  # worldwide_trend and active_countries
         [
-            html.Div([
+            html.Div(
                 dcc.Graph(id='worldwide_trend'),
-                    html.Div(dcc.Markdown('Display data in the above two charts as total values or as values relative to population:'),
-                        style={
-                            'textAlign': 'center',
-                            'color': dash_colors['text'],
-                            'width': '100%',
-                            'float': 'center',
-                            'display': 'inline-block'}),
-                html.Div(
-                    dcc.RadioItems(
-                        id='population_select',
-                        options=[{'label': 'Total values', 'value': 'absolute'},
-                                 {'label': 'Values per 100,000 of population', 'value': 'percent'}],
-                        value='absolute',
-                        labelStyle={'float': 'center', 'display': 'inline-block'},
-                        style={'textAlign': 'center',
-                            'color': dash_colors['text'],
-                            'width': '100%',
-                            'float': 'center',
-                            'display': 'inline-block'
-                            })
-                )],
                 style={'width': '50%', 'float': 'left', 'display': 'inline-block'}
                 ),
             html.Div([
