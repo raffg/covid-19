@@ -181,6 +181,72 @@ def load_time_series(source='web'):
         global_confirmed_deaths_recovered
     ])
 
+
+    # df = pd.concat([
+    #         pd.merge(
+    #             pd.melt(confirmed_us,
+    #                 id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
+    #                 value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
+    #                                                 'Province_State': 'Province/State',
+    #                                                 'Lat': 'Latitude',
+    #                                                 'Long_': 'Longitude',
+    #                                                 'variable': 'date',
+    #                                                 'value': 'Confirmed'}),
+    #             pd.melt(deaths_us,
+    #                 id_vars=['Country_Region', 'Province_State', 'Admin2', 'Lat', 'Long_'],
+    #                 value_vars=dates).rename(columns={'Country_Region': 'Country/Region',
+    #                                                 'Province_State': 'Province/State',
+    #                                                 'Lat': 'Latitude',
+    #                                                 'Long_': 'Longitude',
+    #                                                 'variable': 'date',
+    #                                                 'value': 'Deaths'}),
+    #             on=['date',
+    #                 'Country/Region',
+    #                 'Province/State',
+    #                 'Admin2',
+    #                 'Latitude',
+    #                 'Longitude']).assign(Recovered=np.nan)[['date',
+    #                                                         'Country/Region',
+    #                                                         'Province/State',
+    #                                                         'Admin2',
+    #                                                         'Latitude',
+    #                                                         'Longitude',
+    #                                                         'Confirmed',
+    #                                                         'Deaths',
+    #                                                         'Recovered']],
+    #         pd.merge(
+    #             pd.merge(
+    #                 pd.melt(confirmed_global,
+    #                     id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+    #                     value_vars=dates).rename(columns={'Lat': 'Latitude',
+    #                                                     'Long': 'Longitude',
+    #                                                     'variable': 'date',
+    #                                                     'value': 'Confirmed'}).assign(Admin2=np.nan),
+    #                 pd.melt(deaths_global,
+    #                     id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+    #                     value_vars=dates).rename(columns={'Lat': 'Latitude',
+    #                                                     'Long': 'Longitude',
+    #                                                     'variable': 'date',
+    #                                                     'value': 'Deaths'}).assign(Admin2=np.nan),
+    #                 on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude']),
+    #             pd.melt(recovered_global,
+    #                     id_vars=['Country/Region', 'Province/State', 'Lat', 'Long'],
+    #                     value_vars=dates).rename(columns={'Lat': 'Latitude',
+    #                                                     'Long': 'Longitude',
+    #                                                     'variable': 'date',
+    #                                                     'value': 'Recovered'}).assign(Admin2=np.nan),
+    #             on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude']
+    #         )[['date',
+    #         'Country/Region',
+    #         'Province/State',
+    #         'Admin2',
+    #         'Latitude',
+    #         'Longitude',
+    #         'Confirmed',
+    #         'Deaths',
+    #         'Recovered']]
+    #     ])
+
     df['date'] = pd.to_datetime(df['date'])
 
     # Create "Recovered" state for unassigned recoveries
@@ -439,194 +505,20 @@ def etl(layout='time_series', source='web'):
             'Deaths',
             'Recovered']]
 
-    # Add population values
-
-    # source: United Nations, https://population.un.org/wpp/Download/Standard/CSV/
-    # 2019 data
-    pop_global = pd.read_csv('data/WPP2019_TotalPopulationBySex.csv')
-    pop_global = pop_global[(pop_global['Variant'] == 'Medium') & (pop_global['Time'] == 2020)][['Location', 'PopTotal']].reset_index(drop=True)
-    pop_global['population'] = (pop_global['PopTotal'] * 1000).astype(int)
-    pop_global['region'] = pop_global['Location']
-    pop_global = pop_global[['region', 'population']]
-
-    # source: US Census, https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html
-    # 2019 data projected from 2010 Census
-    pop_us = pd.read_csv('data/nst-est2019-alldata.csv')
-    pop_us = pop_us[['NAME', 'POPESTIMATE2019']]
-    pop_us['region'] = pop_us['NAME']
-    pop_us['population'] = pop_us['POPESTIMATE2019']
-    pop_us = pop_us[['region', 'population']]
-
-    # source: National Bureau of Statistics of China, http://data.stats.gov.cn/english/easyquery.htm?cn=E0103
-    # Hong Kong source: World Bank, https://data.worldbank.org/indicator/SP.POP.TOTL?locations=HK
-    # 2018 data
-    pop_china = pd.read_csv('data/AnnualbyProvince.csv', header=3, encoding='ISO-8859-1')
-    pop_china = pop_china[['Region', '2018']].iloc[:31]
-    pop_china['region'] = pop_china['Region']
-    pop_china['population'] = (pop_china['2018'] * 10000).astype(int)
-    pop_china = pop_china[['region', 'population']]
-    pop_china.loc[31] = ['Hong Kong', pop_global[pop_global['region'] == 'China, Hong Kong SAR']['population'].values[0]]
-    pop_china.loc[32] = ['Macau', pop_global[pop_global['region'] == 'China, Macao SAR']['population'].values[0]]
-
-    # Merge population data
-    df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
-    df = df.rename(columns={'population': 'pop_global'})
-    df = pd.merge(df, pop_us, left_on='Province/State', right_on='region', how='left').drop('region', axis=1)
-    df = df.rename(columns={'population': 'pop_us'})
-    df = pd.merge(df, pop_china, left_on='Province/State', right_on='region', how='left').drop('region', axis=1)
-    df = df.rename(columns={'population': 'pop_china'})
-
-    df['population'] = df['pop_global']
-    df.loc[df['pop_us'].notnull(), ['population']] = df['pop_us']
-    df.loc[df['pop_china'].notnull(), ['population']] = df['pop_china']
-    df = df.drop(['pop_global', 'pop_us', 'pop_china'], axis=1)
-
-    # Fix mismatched country names
-    df.loc[df['Country/Region'] == 'Bolivia', ['population']] = pop_global.loc[pop_global['region'] == 'Bolivia (Plurinational State of)']['population'].values
-    df.loc[df['Country/Region'] == 'Brunei', ['population']] = pop_global.loc[pop_global['region'] == 'Brunei Darussalam']['population'].values
-    df.loc[df['Country/Region'] == 'Burma', ['population']] = pop_global.loc[pop_global['region'] == 'Myanmar']['population'].values
-    df.loc[df['Country/Region'] == 'Congo (Brazzaville)', ['population']] = pop_global.loc[pop_global['region'] == 'Congo']['population'].values
-    df.loc[df['Country/Region'] == 'Congo (Kinshasa)', ['population']] = pop_global.loc[pop_global['region'] == 'Democratic Republic of the Congo']['population'].values
-    df.loc[df['Country/Region'] == "Cote d'Ivoire", ['population']] = pop_global.loc[pop_global['region'] == "Côte d'Ivoire"]['population'].values
-    df.loc[df['Country/Region'] == 'Iran', ['population']] = pop_global.loc[pop_global['region'] == 'Iran (Islamic Republic of)']['population'].values
-    df.loc[df['Country/Region'] == 'South Korea', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Korea']['population'].values
-    df.loc[df['Country/Region'] == 'Laos', ['population']] = pop_global.loc[pop_global['region'] == "Lao People's Democratic Republic"]['population'].values
-    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova']['population'].values
-    df.loc[df['Country/Region'] == 'Russia', ['population']] = pop_global.loc[pop_global['region'] == 'Russian Federation']['population'].values
-    df.loc[df['Country/Region'] == 'Taiwan', ['population']] = pop_global.loc[pop_global['region'] == 'China, Taiwan Province of China']['population'].values
-    df.loc[df['Country/Region'] == 'Tanzania', ['population']] = pop_global.loc[pop_global['region'] == 'United Republic of Tanzania']['population'].values
-    df.loc[df['Country/Region'] == 'Venezuela', ['population']] = pop_global.loc[pop_global['region'] == 'Venezuela (Bolivarian Republic of)']['population'].values
-    df.loc[df['Country/Region'] == 'Vietnam', ['population']] = pop_global.loc[pop_global['region'] == 'Viet Nam']['population'].values
-    df.loc[df['Country/Region'] == 'Syria', ['population']] = pop_global.loc[pop_global['region'] == 'Syrian Arab Republic']['population'].values
-    df.loc[(df['Country/Region'] == 'US') & (df['Province/State'] == 'Recovered'), ['population']] = pop_global.loc[pop_global['region'] == 'United States of America']['population'].values
-
-    # Set population per 100,000
-    df['population'] = df['population'] / 100000
-
     return df
 
 def worldwide(data):
-    level_0 = data[~data['Country/Region'].isin(['Australia',
-                                        'China',
-                                        'Denmark',
-                                        'France',
-                                        'Netherlands',
-                                        'US',
-                                        'United Kingdom'])]
-    level_0 = level_0[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-
-    level_1 = data[data['Country/Region'].isin(['Australia',
-                            'Denmark',
-                            'France',
-                            'Netherlands',
-                            'United Kingdom'])].groupby(['date',
-                                                        'Country/Region'],
-                                                        as_index=False).agg({'Province/State': 'first',
-                                                                            'Admin2': 'first',
-                                                                            'Latitude': 'mean',
-                                                                            'Longitude': 'mean',
-                                                                            'population': 'first',
-                                                                            'Confirmed': 'sum',
-                                                                            'Active': 'sum',
-                                                                            'Deaths': 'sum',
-                                                                            'Recovered': 'sum'})
-    level_1 = level_1.assign(**{'Province/State': data['Province/State'].apply(lambda x: np.nan),
-                                'Admin2': data['Admin2'].apply(lambda x: np.nan)})
-    level_1 = level_1[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-
-    level_2 = data[data['Country/Region'] == 'China'].groupby(['date',
-                                                        'Country/Region'],
-                                                        as_index=False).agg({'Province/State': 'first',
-                                                                            'Admin2': 'first',
-                                                                            'Latitude': 'mean',
-                                                                            'Longitude': 'mean',
-                                                                            'population': 'sum',
-                                                                            'Confirmed': 'sum',
-                                                                            'Active': 'sum',
-                                                                            'Deaths': 'sum',
-                                                                            'Recovered': 'sum'})
-    level_2 = level_2.assign(**{'Province/State': data['Province/State'].apply(lambda x: np.nan),
-                                'Admin2': data['Admin2'].apply(lambda x: np.nan)})
-    level_2 = level_2[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-
-    level_3 = data[(data['Country/Region'] == 'US') & (data['Province/State'] != 'Recovered')].groupby(['date',
-                                                    'Province/State'], as_index=False).agg({'Country/Region': 'first',
-                                                                                            'Admin2': 'first',
-                                                                                            'Latitude': 'mean',
-                                                                                            'Longitude': 'mean',
-                                                                                            'population': 'first',
-                                                                                            'Confirmed': 'sum',
-                                                                                            'Active': 'sum',
-                                                                                            'Deaths': 'sum',
-                                                                                            'Recovered': 'sum'})
-
-    level_3 = level_3.groupby(['date', 'Country/Region'], as_index=False).agg({'Province/State': 'first',
-                                                                                            'Admin2': 'first',
-                                                                                            'Latitude': 'mean',
-                                                                                            'Longitude': 'mean',
-                                                                                            'population': 'sum',
-                                                                                            'Confirmed': 'sum',
-                                                                                            'Active': 'sum',
-                                                                                            'Deaths': 'sum',
-                                                                                            'Recovered': 'sum'})
-
-    level_3 = level_3.assign(**{'Province/State': data['Province/State'].apply(lambda x: np.nan),
-                                'Admin2': data['Admin2'].apply(lambda x: np.nan)})
-    level_3 = level_3[['date', 'Country/Region', 'Province/State', 'Admin2',
-                    'Latitude', 'Longitude', 'Confirmed', 'Active', 'Deaths',
-                    'Recovered', 'population']]
-
-    level_3['Recovered'] = data[(data['Country/Region'] == 'US') & (data['Province/State'] == 'Recovered')].reset_index()['Recovered']
-
-    df = pd.concat([level_0,
-                    level_1,
-                    level_2,
-                    level_3]).sort_values(['date',
-                                           'Country/Region']).reset_index(drop=True)[['date',
-                                                                                    'Country/Region',
-                                                                                    'Latitude',
-                                                                                    'Longitude',
-                                                                                    'population',
-                                                                                    'Confirmed',
-                                                                                    'Active',
-                                                                                    'Deaths',
-                                                                                    'Recovered']]
-
-
-    regions_to_drop = df[df['population'].isna()]['Country/Region'].unique()
-    df = df[~df['Country/Region'].isin(regions_to_drop)]
-
+    df = data.groupby(['date', 'Country/Region'], as_index=False).agg({'Latitude': 'mean',
+                                                                       'Longitude': 'mean',
+                                                                       'Confirmed': 'sum',
+                                                                       'Deaths': 'sum',
+                                                                       'Recovered': 'sum',
+                                                                       'Active': 'sum'})
     df['share_of_last_week'] = 100 * (df['Confirmed'] - df.groupby('Country/Region')['Confirmed'].shift(7, fill_value=0)) / df['Confirmed']
     df['share_of_last_week'] = df['share_of_last_week'].replace([np.inf, -np.inf], np.nan).fillna(0)
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
     df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
-
-    df['Confirmed per 100,000'] = df['Confirmed'] / df['population']
-    df['Active per 100,000'] = df['Active'] / df['population']
-    df['Deaths per 100,000'] = df['Deaths'] / df['population']
-    df['Recovered per 100,000'] = df['Recovered'] / df['population']
-
-    df = df[['date',
-             'Country/Region',
-             'Latitude',
-             'Longitude',
-             'population',
-             'Confirmed',
-             'Confirmed per 100,000',
-             'Deaths',
-             'Deaths per 100,000',
-             'Recovered',
-             'Recovered per 100,000',
-             'Active',
-             'Active per 100,000',
-             'share_of_last_week',
-             'percentage']].sort_values(['date', 'Country/Region'])
+    df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
 
     # Manually change some country centroids which are mislocated due to far off colonies
     df.loc[df['Country/Region'] == 'US', 'Latitude'] = 39.810489
@@ -650,44 +542,26 @@ def worldwide(data):
     return df
 
 def us(data):
-    data = data[data['Country/Region'] == 'US']
-    regions_to_drop = data[data['population'].isna()]['Province/State'].unique()
-    df = data[~data['Province/State'].isin(regions_to_drop)]
-
-    df = df.groupby(['date', 'Province/State'], as_index=False).agg({'population': 'sum',
-                                                                     'Confirmed': 'sum',
+    df = data[data['Country/Region'] == 'US']
+    df = df.groupby(['date', 'Province/State'], as_index=False).agg({'Confirmed': 'sum',
                                                                      'Deaths': 'sum',
                                                                      'Recovered': 'sum',
                                                                      'Active': 'sum'})
     df = df.merge(pd.read_csv('data/geo_us.csv'), left_on='Province/State', right_on='Province/State', how='left')
     df = df.rename(columns={'Province/State': 'Country/Region'})
-
-    df['Confirmed per 100,000'] = df['Confirmed'] / df['population']
-    df['Active per 100,000'] = df['Active'] / df['population']
-    df['Deaths per 100,000'] = df['Deaths'] / df['population']
-    df['Recovered per 100,000'] = df['Recovered'] / df['population']
-
+    df = df[['date',
+            'Country/Region',
+            'Latitude',
+            'Longitude',
+            'Confirmed',
+            'Active',
+            'Deaths',
+            'Recovered']].sort_values(['date', 'Country/Region'])
     df['share_of_last_week'] = 100 * (df['Confirmed'] - df.groupby('Country/Region')['Confirmed'].shift(7, fill_value=0)) / df['Confirmed']
     df['share_of_last_week'] = df['share_of_last_week'].replace([np.inf, -np.inf], np.nan).fillna(0)
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
     df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
-
-    df = df[['date',
-             'Country/Region',
-             'Latitude',
-             'Longitude',
-             'population',
-             'Confirmed',
-             'Confirmed per 100,000',
-             'Deaths',
-             'Deaths per 100,000',
-             'Recovered',
-             'Recovered per 100,000',
-             'Active',
-             'Active per 100,000',
-             'share_of_last_week',
-             'percentage']].sort_values(['date', 'Country/Region'])
-
+    df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
     return df
 
 def eu(data):
@@ -702,41 +576,17 @@ def eu(data):
       'Switzerland', 'Turkey', 'Ukraine', 'United Kingdom',
       'Vatican City']
     df = data[data['Country/Region'].isin(eu)]
-    countries_to_drop = df[df['population'].isna()]['Country/Region'].unique()
-    df = df[~df['Country/Region'].isin(countries_to_drop)]
     df = df.groupby(['date', 'Country/Region'], as_index=False).agg({'Latitude': 'mean',
                                                                      'Longitude': 'mean',
-                                                                     'population': 'sum',
                                                                      'Confirmed': 'sum',
                                                                      'Deaths': 'sum',
                                                                      'Recovered': 'sum',
                                                                      'Active': 'sum'})
-
-    df['Confirmed per 100,000'] = df['Confirmed'] / df['population']
-    df['Active per 100,000'] = df['Active'] / df['population']
-    df['Deaths per 100,000'] = df['Deaths'] / df['population']
-    df['Recovered per 100,000'] = df['Recovered'] / df['population']
-
     df['share_of_last_week'] = 100 * (df['Confirmed'] - df.groupby('Country/Region')['Confirmed'].shift(7, fill_value=0)) / df['Confirmed']
     df['share_of_last_week'] = df['share_of_last_week'].replace([np.inf, -np.inf], np.nan).fillna(0)
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
     df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
-
-    df = df[['date',
-             'Country/Region',
-             'Latitude',
-             'Longitude',
-             'population',
-             'Confirmed',
-             'Confirmed per 100,000',
-             'Deaths',
-             'Deaths per 100,000',
-             'Recovered',
-             'Recovered per 100,000',
-             'Active',
-             'Active per 100,000',
-             'share_of_last_week',
-             'percentage']].sort_values(['date', 'Country/Region'])
+    df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
 
     # Manually change some country centroids which are mislocated due to far off colonies
     df.loc[df['Country/Region'] == 'US', 'Latitude'] = 39.810489
@@ -763,32 +613,11 @@ def china(data):
     df = data[data['Country/Region'] == 'China']
     df = df.drop(['Country/Region', 'Admin2'], axis=1)
     df = df.rename(columns={'Province/State': 'Country/Region'})
-
-    df['Confirmed per 100,000'] = df['Confirmed'] / df['population']
-    df['Active per 100,000'] = df['Active'] / df['population']
-    df['Deaths per 100,000'] = df['Deaths'] / df['population']
-    df['Recovered per 100,000'] = df['Recovered'] / df['population']
-
     df['share_of_last_week'] = 100 * (df['Confirmed'] - df.groupby('Country/Region')['Confirmed'].shift(7, fill_value=0)) / df['Confirmed']
     df['share_of_last_week'] = df['share_of_last_week'].replace([np.inf, -np.inf], np.nan).fillna(0)
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
     df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
-    df = df[['date',
-             'Country/Region',
-             'Latitude',
-             'Longitude',
-             'population',
-             'Confirmed',
-             'Confirmed per 100,000',
-             'Deaths',
-             'Deaths per 100,000',
-             'Recovered',
-             'Recovered per 100,000',
-             'Active',
-             'Active per 100,000',
-             'share_of_last_week',
-             'percentage']].sort_values(['date', 'Country/Region'])
-
+    df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
     return df
 
 def us_county(data):
