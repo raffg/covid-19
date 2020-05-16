@@ -354,7 +354,7 @@ def set_countries_value(view, available_options):
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom']
     elif view == 'China':
-        return ['Hubei', 'Guangdong', 'Henan', 'Zhejiang', 'Hunan', 'Hong Kong', 'Anhui']
+        return ['Hubei', 'Guangdong', 'Henan', 'Zhejiang', 'Hunan', 'Hong Kong', 'Macau']
     else:
         return ['US', 'Italy', 'United Kingdom', 'Spain', 'France', 'Germany', 'Russia']
 
@@ -679,8 +679,6 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             }
         ),
 
-    # html.Div(dcc.Markdown('')),
-
     html.Div(dcc.Markdown('Display data in the below two charts as total values or as values relative to population:'),
         style={
             'textAlign': 'center',
@@ -700,7 +698,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                 'float': 'center',
                 'display': 'inline-block'
                 })
-    ),
+        ),
 
     html.Div(  # worldwide_trend and active_countries
         [
@@ -789,4 +787,4 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
