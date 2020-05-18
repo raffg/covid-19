@@ -262,6 +262,7 @@ def worldwide_trend(view, population):
         df = df_worldwide
     elif view == 'United States':
         df = df_us
+        df_us.loc[df_us['Country/Region'] == 'Recovered', ['population']] = 0
     elif view == 'Europe':
         df = df_eu
     elif view == 'China':
