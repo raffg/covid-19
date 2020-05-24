@@ -602,7 +602,7 @@ def us_population():
     pop_us = pop_us[['region', 'population']]
     return pop_us
 
-def china_population():
+def china_population(pop_global):
     # source: National Bureau of Statistics of China, http://data.stats.gov.cn/english/easyquery.htm?cn=E0103
     # Hong Kong source: World Bank, https://data.worldbank.org/indicator/SP.POP.TOTL?locations=HK
     # 2018 data
@@ -660,13 +660,13 @@ def population_to_china(df, pop_china):
     df['population'] = df['population'] / 100000
     return df
 
-if __name__ == '__main__':
+def main():
     data = etl('time_series', 'web')
     data.to_csv('data/dashboard_data.csv', index=False)
 
     pop_global = global_population()
     pop_us = us_population()
-    pop_china = china_population()
+    pop_china = china_population(pop_global)
 
     df_worldwide = worldwide(data)
     df_worldwide = population_to_worldwide(df_worldwide, pop_global)
@@ -686,3 +686,6 @@ if __name__ == '__main__':
 
     df_us_county = us_county(data)
     df_us_county.to_csv('data/df_us_county.csv', index=False)
+
+if __name__ == '__main__':
+    main()
