@@ -8,11 +8,15 @@ import numpy as np
 
 import plotly.graph_objects as go
 
+from etl import main
+
 
 app = dash.Dash(__name__)
 server = app.server
 app.config.suppress_callback_exceptions = True
 app.title = 'COVID-19'
+
+main()
 
 data = pd.read_csv('data/dashboard_data.csv')
 data['date'] = pd.to_datetime(data['date'])
