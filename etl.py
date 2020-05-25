@@ -3,10 +3,8 @@ import numpy as np
 import glob
 import re
 from datetime import date, timedelta
-import time
 import io
 import requests
-import sys
 
 
 def save_from_web(url):
@@ -14,57 +12,28 @@ def save_from_web(url):
     raw_string = requests.get(url).content
     return pd.read_csv(io.StringIO(raw_string.decode('utf-8')))
 
-def load_time_series(source='web', update='manual'):
+def load_time_series(source='web'):
     if source == 'web':
-        today = date.today()
-
         prepend = r'csse_covid_19_time_series/time_series_covid19_'
 
-        current_data = False
-        # Continuously re-download files until all have been updated
-        while not current_data:
-            print('confirmed_us')
-            confirmed_us = save_from_web(r'{}confirmed_US.csv'.format(prepend))
-            print('confirmed_global')
-            confirmed_global = save_from_web(r'{}confirmed_global.csv'.format(prepend))
-            print('deaths_us')
-            deaths_us = save_from_web(r'{}deaths_US.csv'.format(prepend))
-            print('deaths_global')
-            deaths_global = save_from_web(r'{}deaths_global.csv'.format(prepend))
-            print('recovered_global')
-            recovered_global =save_from_web(r'{}recovered_global.csv'.format(prepend))
-
-            csv_files = {'1': confirmed_us,
-                         '2': confirmed_global,
-                         '3': deaths_us,
-                         '4': deaths_global,
-                         '5': recovered_global}
-
-            responses = {'1': False,
-                         '2': False,
-                         '3': False,
-                         '4': False,
-                         '5': False}
-
-            for csv in csv_files:
-                if pd.to_datetime(csv_files[csv].columns[-1]) == today:
-                    responses[csv] = True
-
-            if sum(responses.values()) == 5:
-                current_data = True
-                print('Date = {}'.format(str(today)))
-            elif update == 'manual':
-                current_data = True
-                print('Date = {}'.format(confirmed_us.columns[-1]))
-            else:
-                print('Waiting for GitHub update...')
-                time.sleep(600)
-                print()
-        
+        print('confirmed_us')
+        confirmed_us = save_from_web(r'{}confirmed_US.csv'.format(prepend))
         confirmed_us.to_csv('data/raw/time_series_covid19_confirmed_US.csv', index=False)
+
+        print('confirmed_global')
+        confirmed_global = save_from_web(r'{}confirmed_global.csv'.format(prepend))
         confirmed_global.to_csv('data/raw/time_series_covid19_confirmed_global.csv', index=False)
+
+        print('deaths_us')
+        deaths_us = save_from_web(r'{}deaths_US.csv'.format(prepend))
         deaths_us.to_csv('data/raw/time_series_covid19_deaths_us.csv', index=False)
+
+        print('deaths_global')
+        deaths_global = save_from_web(r'{}deaths_global.csv'.format(prepend))
         deaths_global.to_csv('data/raw/time_series_covid19_deaths_global.csv', index=False)
+
+        print('recovered_global')
+        recovered_global =save_from_web(r'{}recovered_global.csv'.format(prepend))
         recovered_global.to_csv('data/raw/time_series_covid19_recovered_global.csv', index=False)
 
     elif source == 'folder':
@@ -458,9 +427,9 @@ def load_daily_reports(source='web'):
 
     return pd.concat(files, axis=0, ignore_index=True, sort=False)
 
-def etl(layout='time_series', source='web', update='manual'):
+def etl(layout='time_series', source='web'):
     if layout == 'time_series':
-        df = load_time_series(source=source, update=update)
+        df = load_time_series(source=source)
     elif layout == 'daily_reports':
         df = load_daily_reports(source=source)
 
@@ -691,8 +660,8 @@ def population_to_china(df, pop_china):
     df['population'] = df['population'] / 100000
     return df
 
-def main(update):
-    data = etl('time_series', 'web', update)
+def main():
+    data = etl('time_series', 'web')
     data.to_csv('data/dashboard_data.csv', index=False)
 
     pop_global = global_population()
@@ -719,7 +688,4 @@ def main(update):
     df_us_county.to_csv('data/df_us_county.csv', index=False)
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2:
-        main(update=str(sys.argv[1]))
-    else:
-        main(update='manual')
+    main()
