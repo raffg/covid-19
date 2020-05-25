@@ -19,6 +19,7 @@ def load_time_series(source='web', update='manual'):
         today = date.today()
         prepend = r'csse_covid_19_time_series/time_series_covid19_'
         current_data = False
+        start_time = time.time()
         # Continuously re-download files until all have been updated
         while not current_data:
             print('confirmed_us')
@@ -55,6 +56,10 @@ def load_time_series(source='web', update='manual'):
                 current_data = True
                 print('Date = {}'.format(confirmed_us.columns[-1]))
             else:
+                if time.time() - start_time > 2.5 * 3600:  # stop checking after 2.5 hours
+                    print()
+                    print('Timed out after 2.5 hours')
+                    return 'end'
                 print('Waiting for GitHub update...')
                 time.sleep(600)
                 print()
@@ -459,6 +464,8 @@ def load_daily_reports(source='web'):
 def etl(layout='time_series', source='web', update='manual'):
     if layout == 'time_series':
         df = load_time_series(source=source, update=update)
+        if df == 'end':
+            return df
     elif layout == 'daily_reports':
         df = load_daily_reports(source=source)
 
@@ -691,6 +698,8 @@ def population_to_china(df, pop_china):
 
 def main(update):
     data = etl('time_series', 'web', update)
+    if data == 'end':
+        return
     data.to_csv('data/dashboard_data.csv', index=False)
 
     pop_global = global_population()
