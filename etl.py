@@ -60,6 +60,7 @@ def load_time_series(source='web', update='manual'):
                     print()
                     print('Timed out after 2.5 hours')
                     return 'end'
+                print()
                 print('Waiting for GitHub update...')
                 time.sleep(600)
                 print()
