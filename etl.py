@@ -51,9 +51,11 @@ def load_time_series(source='web', update='manual'):
 
             if sum(responses.values()) == 5:
                 current_data = True
+                print()
                 print('Date = {}'.format(confirmed_us.columns[-1]))
             elif update == 'manual':
                 current_data = True
+                print()
                 print('Date = {}'.format(confirmed_us.columns[-1]))
             else:
                 if time.time() - start_time > 2.5 * 3600:  # stop checking after 2.5 hours
@@ -465,7 +467,7 @@ def load_daily_reports(source='web'):
 def etl(layout='time_series', source='web', update='manual'):
     if layout == 'time_series':
         df = load_time_series(source=source, update=update)
-        if df == 'end':
+        if isinstance(df, str):
             return df
     elif layout == 'daily_reports':
         df = load_daily_reports(source=source)
@@ -699,7 +701,7 @@ def population_to_china(df, pop_china):
 
 def main(update):
     data = etl('time_series', 'web', update)
-    if data == 'end':
+    if isinstance(data, str):
         return
     data.to_csv('data/dashboard_data.csv', index=False)
 
