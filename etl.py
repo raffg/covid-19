@@ -22,16 +22,16 @@ def load_time_series(source='web', update='manual'):
         start_time = time.time()
         # Continuously re-download files until all have been updated
         while not current_data:
-            print('confirmed_us')
             confirmed_us = save_from_web(r'{}confirmed_US.csv'.format(prepend))
-            print('confirmed_global')
+            print('confirmed_us      ', confirmed_us.columns[-1])
             confirmed_global = save_from_web(r'{}confirmed_global.csv'.format(prepend))
-            print('deaths_us')
+            print('confirmed_global  ', confirmed_global.columns[-1])
             deaths_us = save_from_web(r'{}deaths_US.csv'.format(prepend))
-            print('deaths_global')
+            print('deaths_us         ', deaths_us.columns[-1])
             deaths_global = save_from_web(r'{}deaths_global.csv'.format(prepend))
-            print('recovered_global')
+            print('deaths_global     ', deaths_global.columns[-1])
             recovered_global =save_from_web(r'{}recovered_global.csv'.format(prepend))
+            print('recovered_global  ', recovered_global.columns[-1])
 
             csv_files = {'1': confirmed_us,
                          '2': confirmed_global,
