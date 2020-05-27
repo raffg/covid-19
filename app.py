@@ -349,7 +349,7 @@ def set_countries_value(view, available_options):
     sets default selections for regions in the upper-right chart drop-down
     '''
     if view == 'Worldwide':
-        return ['US', 'Italy', 'United Kingdom', 'Spain', 'France', 'Germany', 'Russia']
+        return ['US', 'Italy', 'United Kingdom', 'Spain', 'France', 'Russia', 'Brazil']
     elif view == 'United States':
         return ['New York', 'New Jersey', 'Massachusetts', 'Pennsylvania', 'California', 'Michigan', 'Washington', 'Illinois']
     elif view == 'Europe':
