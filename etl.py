@@ -172,8 +172,12 @@ def load_time_series(source='web', update='manual'):
 
     confirmed_deaths_global = pd.merge(
         confirmed_global_melt,
-        deaths_global_melt,
-        on=['date', 'Country/Region', 'Province/State', 'Admin2', 'Latitude', 'Longitude'],
+        deaths_global_melt[['date',
+                            'Country/Region',
+                            'Province/State',
+                            'Admin2',
+                            'Deaths']],
+        on=['date', 'Country/Region', 'Province/State', 'Admin2'],
         how='outer')
 
     # fix some mismatched coordinates
