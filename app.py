@@ -756,25 +756,23 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                 min=list(range(len(data['date'].unique())))[0],
                 max=list(range(len(data['date'].unique())))[-1],
                 value=list(range(len(data['date'].unique())))[-1],
-                marks={(idx): (date.format(u"\u2011", u"\u2011") if
-                    (idx-4)%7==0 else '') for idx, date in
+                marks={(idx): {'label': date.format(u"\u2011", u"\u2011") if
+                    (idx-4)%7==0 else '', 'style':{'transform': 'rotate(30deg) translate(0px, 7px)'}} for idx, date in
                     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
-                    item in data['date']])))},
+                    item in data['date']])))},  # for weekly marks,
+                # marks={(idx): (date.format(u"\u2011", u"\u2011") if
+                #     date[4:6] in ['01', '15'] else '') for idx, date in
+                #     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
+                #     item in data['date']])))},  # for bi-monthly makrs
                 step=1,
                 vertical=False,
                 updatemode='mouseup'),
-            style={'width': '100%', 'float': 'left'}),  # width = 1 - (100 - x) / x
-        style={'width': '100%', 'float': 'right'}),  # width = x
-
-    html.Div(dcc.Markdown(' '),
-        style={
-            'textAlign': 'center',
-            'color': dash_colors['text'],
-            'width': '100%',
-            'float': 'center',
-            'display': 'inline-block'}),
+            style={'width': '94.74%', 'float': 'left'}),  # width = 1 - (100 - x) / x
+        style={'width': '95%', 'float': 'right'}),  # width = x
     
     html.Div(dcc.Markdown('''
+            &nbsp;  
+            &nbsp;  
             Built by [Greg Rafferty](https://www.linkedin.com/in/gregrafferty/)  
             Source data: [Johns Hopkins CSSE](https://github.com/CSSEGISandData/COVID-19)  
             Instructions and feature documention [here](https://github.com/raffg/covid-19/blob/master/README.md)  
