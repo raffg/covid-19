@@ -763,8 +763,8 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                 step=1,
                 vertical=False,
                 updatemode='mouseup'),
-            style={'width': '94.74%', 'float': 'left'}),  # width = 1 - (100 - x) / x
-        style={'width': '95%', 'float': 'right'}),  # width = x
+            style={'width': '100%', 'float': 'left'}),  # width = 1 - (100 - x) / x
+        style={'width': '100%', 'float': 'right'}),  # width = x
 
     html.Div(dcc.Markdown(' '),
         style={
