@@ -53,28 +53,34 @@ def load_time_series(source='web', update='manual'):
                 if sum(responses.values()) == 5:
                     current_data = True
                     print()
+                    print(time.time())
                     print('Date = {}'.format(confirmed_us.columns[-1]))
                 elif update == 'manual':
                     current_data = True
                     print()
+                    print(time.time())
                     print('Date = {}'.format(confirmed_us.columns[-1]))
                 else:
                     if time.time() - start_time > 2.5 * 3600:  # stop checking after 2.5 hours
                         print()
                         print('Timed out after 2.5 hours')
+                        print(time.time())
                         return 'end'
                     print()
                     print('Waiting for GitHub update...')
                     time.sleep(600)
+                    print(time.time())
                     print()
             except requests.exceptions.ConnectionError:
                 if time.time() - start_time > 2.5 * 3600:  # stop checking after 2.5 hours
                     print()
                     print('Timed out after 2.5 hours')
+                    print(time.time())
                     return 'end'
                 print()
                 print('Waiting for connection to internet...')
                 time.sleep(600)
+                print(time.time())
                 print()
         
         confirmed_us.to_csv('data/raw/time_series_covid19_confirmed_US.csv', index=False)
