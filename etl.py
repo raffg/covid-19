@@ -69,8 +69,8 @@ def load_time_series(source='web', update='manual'):
                     print()
                     print('Waiting for GitHub update...')
                     time.sleep(600)
-                    print(time.strftime('%H:%M:%S', time.localtime(time.time())))
                     print()
+                    print(time.strftime('%H:%M:%S', time.localtime(time.time())))
             except requests.exceptions.ConnectionError:
                 if time.time() - start_time > 2.5 * 3600:  # stop checking after 2.5 hours
                     print()
@@ -80,8 +80,8 @@ def load_time_series(source='web', update='manual'):
                 print()
                 print('Waiting for connection to internet...')
                 time.sleep(600)
-                print(time.strftime('%H:%M:%S', time.localtime(time.time())))
                 print()
+                print(time.strftime('%H:%M:%S', time.localtime(time.time())))
         
         confirmed_us.to_csv('data/raw/time_series_covid19_confirmed_US.csv', index=False)
         confirmed_global.to_csv('data/raw/time_series_covid19_confirmed_global.csv', index=False)
