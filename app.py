@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import numpy as np
 
+import plotly
 import plotly.graph_objects as go
 
 
@@ -511,6 +512,12 @@ def world_map(view, date_index):
             )
         }
 
+def hex_to_rgba(h, alpha=1):
+    '''
+    converts color value in hex format to rgba format with alpha transparency
+    '''
+    return tuple([int(h.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)] + [alpha])
+
 @app.callback(
     Output('trajectory', 'figure'),
     [Input('global_format', 'value'),
@@ -569,6 +576,8 @@ def trajectory(view, date_index):
     countries = [country for country in countries_full if country in countries]
 
     traces = []
+    trace_colors = plotly.colors.qualitative.D3
+    color_idx = 0
 
     for country in countries:
         filtered_df = df[df['Country/Region'] == country].reset_index()
@@ -579,17 +588,25 @@ def trajectory(view, date_index):
 
         marker_size = [0] * (len(trace_data) - 1)
         marker_size.append(6)
+        color = trace_colors[color_idx % len(trace_colors)]
+        marker_color = 'rgba' + str(hex_to_rgba(color, 1))
+        line_color = 'rgba' + str(hex_to_rgba(color, .75))
 
         traces.append(
             go.Scatter(
                     x=trace_data['Confirmed'],
                     y=trace_data['new_cases'],
                     mode='lines+markers',
-                    marker=dict(size=marker_size, line=dict(width=0)),
+                    marker=dict(color=marker_color,
+                                size=marker_size,
+                                line=dict(width=0)),
+                    line=dict(color=line_color, width=2),
                     name=country,
                     text=trace_data['date'],
                     hovertemplate='%{x:,g}<br>%{text}')
         )
+
+        color_idx += 1
 
     return {
         'data': traces,
@@ -787,4 +804,4 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
