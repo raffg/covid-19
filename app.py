@@ -561,11 +561,7 @@ def trajectory(view, date_index):
     xmax = np.log(1.25 * df['Confirmed'].max()) / np.log(10)
     xmin = np.log(threshold) / np.log(10)
     ymax = np.log(1.25 * df['new_cases'].max()) / np.log(10)
-    if df[df['Confirmed'] >= threshold]['new_cases'].min() == 0:
-        ymin = 0
-        ymin = np.log(10)
-    else:
-        ymin = np.log(.8 * df[df['Confirmed'] >= threshold]['new_cases'].min()) / np.log(10)
+    ymin = np.log(10)
 
     countries_full = df.groupby(by='Country/Region', as_index=False)['Confirmed'].max().sort_values(by='Confirmed', ascending=False)['Country/Region'].to_list()
     
@@ -804,4 +800,4 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
         ])
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
