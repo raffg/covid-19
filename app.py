@@ -582,11 +582,10 @@ def trajectory(view, date_index):
         trace_data['date'] = pd.to_datetime(trace_data['date'])
         trace_data['date'] = trace_data['date'].dt.strftime('%b %d, %Y')
 
-        marker_size = [0] * (len(trace_data) - 1)
-        marker_size.append(6)
+        marker_size = [0] * (len(trace_data) - 1) + [10]
         color = trace_colors[color_idx % len(trace_colors)]
         marker_color = 'rgba' + str(hex_to_rgba(color, 1))
-        line_color = 'rgba' + str(hex_to_rgba(color, .75))
+        line_color = 'rgba' + str(hex_to_rgba(color, .5))
 
         traces.append(
             go.Scatter(
