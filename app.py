@@ -446,7 +446,7 @@ def world_map(view, date_index):
         df = df_worldwide
         scope='world'
         projection_type='natural earth'
-        sizeref=10
+        sizeref=15
     elif view == 'United States':
         scope='usa'
         projection_type='albers usa'
