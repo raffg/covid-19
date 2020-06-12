@@ -72,9 +72,9 @@ def load_time_series(source='web', update='manual'):
                     print()
                     print(time.strftime('%H:%M:%S', time.localtime(time.time())))
             except requests.exceptions.ConnectionError:
-                if time.time() - start_time > 2.5 * 3600:  # stop checking after 2.5 hours
+                if time.time() - start_time > 4.5 * 3600:  # stop checking after 2.5 hours
                     print()
-                    print('Timed out after 2.5 hours')
+                    print('Timed out after 4.5 hours')
                     print(time.strftime('%H:%M:%S', time.localtime(time.time())))
                     return 'end'
                 print()
