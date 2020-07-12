@@ -597,8 +597,11 @@ def trajectory(view, date_index):
                                 line=dict(width=0)),
                     line=dict(color=line_color, width=2),
                     name=country,
-                    text=trace_data['date'],
-                    hovertemplate='%{x:,g}<br>%{text}')
+                    text = ['{}: {:,} confirmed; {:,} from previous week'.format(country,
+                                                                                trace_data['Confirmed'].iloc[i],
+                                                                                trace_data['new_cases'].iloc[i]) \
+                                                                                    for i in range(len(trace_data))],
+                    hoverinfo='text')
         )
 
         color_idx += 1
