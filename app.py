@@ -356,7 +356,7 @@ def set_countries_value(view, available_options):
     elif view == 'Europe':
         return ['France', 'Germany', 'Italy', 'Spain', 'United Kingdom', 'Belgium', 'Sweden']
     elif view == 'China':
-        return ['Hubei', 'Guangdong', 'Henan', 'Zhejiang', 'Hunan', 'Hong Kong', 'Macau']
+        return ['Hubei', 'Guangdong', 'Xinjiang', 'Zhejiang', 'Hunan', 'Hong Kong', 'Macau']
     else:
         return ['US', 'Italy', 'United Kingdom', 'Spain', 'France', 'Germany', 'Russia']
 
