@@ -444,29 +444,29 @@ def world_map(view, date_index):
     '''
     if view == 'Worldwide':
         df = df_worldwide
-        scope='world'
-        projection_type='natural earth'
-        sizeref=15
+        scope = 'world'
+        projection_type = 'natural earth'
+        sizeref = 35
     elif view == 'United States':
-        scope='usa'
-        projection_type='albers usa'
+        scope = 'usa'
+        projection_type = 'albers usa'
         df = df_us_counties
-        sizeref=3
+        sizeref = 7
     elif view == 'Europe':
         df = df_eu
-        scope='europe'
-        projection_type='natural earth'
-        sizeref=10
+        scope = 'europe'
+        projection_type = 'natural earth'
+        sizeref = 15
     elif view == 'China':
         df = df_china
-        scope='asia'
-        projection_type='natural earth'
-        sizeref=3
+        scope = 'asia'
+        projection_type = 'natural earth'
+        sizeref = 3
     else:
         df = df_worldwide
-        scope='world'
-        projection_type='natural earth',
-        sizeref=10
+        scope = 'world'
+        projection_type = 'natural earth',
+        sizeref = 10
     df = df[(df['date'] == df['date'].unique()[date_index]) & (df['Confirmed'] > 0)]
     return {
             'data': [
