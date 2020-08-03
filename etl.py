@@ -85,14 +85,14 @@ def load_time_series(source='web', update='manual'):
         
         confirmed_us.to_csv('data/raw/time_series_covid19_confirmed_US.csv', index=False)
         confirmed_global.to_csv('data/raw/time_series_covid19_confirmed_global.csv', index=False)
-        deaths_us.to_csv('data/raw/time_series_covid19_deaths_us.csv', index=False)
+        deaths_us.to_csv('data/raw/time_series_covid19_deaths_US.csv', index=False)
         deaths_global.to_csv('data/raw/time_series_covid19_deaths_global.csv', index=False)
         recovered_global.to_csv('data/raw/time_series_covid19_recovered_global.csv', index=False)
 
     elif source == 'folder':
         confirmed_us = pd.read_csv('data/raw/time_series_covid19_confirmed_US.csv')
         confirmed_global = pd.read_csv('data/raw/time_series_covid19_confirmed_global.csv')
-        deaths_us = pd.read_csv('data/raw/time_series_covid19_deaths_us.csv')
+        deaths_us = pd.read_csv('data/raw/time_series_covid19_deaths_US.csv')
         deaths_global = pd.read_csv('data/raw/time_series_covid19_deaths_global.csv')
         recovered_global = pd.read_csv('data/raw/time_series_covid19_recovered_global.csv')
 
