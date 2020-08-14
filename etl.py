@@ -639,6 +639,38 @@ def us_county(data):
     df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
     return df
 
+def us_county_compressed(data, df_us):
+    '''
+    Same as function us_county(data) except that this compresses the data by
+    including only county-level data for the most recent date and then for all
+    other dates state-level data is used. Fixes the issue where the US map
+    causes Heroku to time-out while loading the web page.
+    '''
+    print('processing US counties')
+    df = data[data['Country/Region'] == 'US']
+
+    # Only keep county-level data for previous 8 days for share_of_last_week
+    most_recent = df['date'].max()
+    df = df[df['date'] > most_recent - pd.Timedelta(days=8)]
+
+    df = df.assign(key=df['Admin2'] + ' County, ' + df['Province/State'])
+    df = df.drop('Country/Region', axis=1)
+    df = df.rename(columns={'key': 'Country/Region'})
+    df['share_of_last_week'] = 100 * (df['Confirmed'] - df.groupby('Country/Region')['Confirmed'].shift(7, fill_value=0)) / df['Confirmed']
+    df['share_of_last_week'] = df['share_of_last_week'].replace([np.inf, -np.inf], np.nan).fillna(0)
+    df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
+    df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
+    
+    # Only keep county-level data for most recent date
+    # then merge with state-level data for previous dates
+    df = df[df['date'] == most_recent]
+    # df_us['date'] = pd.to_datetime(df_us['date'])
+    df_us = df_us[df_us['date'] < most_recent]
+    df = pd.concat([df, df_us]).sort_values('date')
+
+    df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
+    return df
+
 def global_population():
     # source: United Nations, https://population.un.org/wpp/Download/Standard/CSV/
     # 2019 data
@@ -723,7 +755,8 @@ def main(update):
     data = etl('time_series', 'web', update)
     if isinstance(data, str):
         return
-    data.to_csv('data/dashboard_data.csv', index=False)
+    # dashboard_data.csv is now unused in app.py, no longer need to save
+    # data.to_csv('data/dashboard_data.csv', index=False)
 
     pop_global = global_population()
     pop_us = us_population()
@@ -745,7 +778,8 @@ def main(update):
     df_china = population_to_china(df_china, pop_china)
     df_china.to_csv('data/df_china.csv', index=False)
 
-    df_us_county = us_county(data)
+    df_us_county = us_county(data)  # full historical US county-level data
+    # df_us_county = us_county_compressed(data, df_us)  # historical US state-level data
     df_us_county.to_csv('data/df_us_county.csv', index=False)
 
 if __name__ == '__main__':
