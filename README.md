@@ -60,6 +60,8 @@ By default, it displays sub-regions which were of particular interest when this 
 
 The infection map features a circular marker over each sub-region. The size of the marker is relative to the square root of the `CONFIRMED` cases within that sub-region and the color indicates the percentage of those cases which were newly confirmed within the previous 7 days. Essentially, the size of the marker is a measure of how many people have caught the virus within that sub-region since the outbreak began and the color is a measure of how active the virus currently is, with dark red indicating the virus is actively spreading and white indicating that it is more under control. Hovering over a marker will reveal the country name and the exact value of the two measures. As with the other charts, the map is zoomable and dragable. Below the chart is a slider bar controlling the date at which the map displays data. By default it is set for the most recent date available but by dragging to the left you can see the spread of the pandemic through time.
 
+When the dashboard focus is set to `United States`, the most recent date shows data down to the county level. However, when using the date slider and going back in the time, previous dates only show data down to the state level. This is due to a limitation of Heroku's free-tier plan. As time goes by, more rows of dates are added to the data used to create this chart and when adding data down to the county level, over 3,000 new rows are added with each date which has overwhelmed Heroku's ability to process in a timely manner. Timeout errors became more frequent and so this change was made to prevent it.
+
 ### Trajectory
 
 ![trajectory](images/trajectory.png)
