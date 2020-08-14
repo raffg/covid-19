@@ -15,7 +15,7 @@ server = app.server
 app.config.suppress_callback_exceptions = True
 app.title = 'COVID-19'
 
-data = pd.read_csv('data/dashboard_data.csv')
+data = pd.read_csv('data/df_worldwide.csv')
 data['date'] = pd.to_datetime(data['date'])
 
 # selects the "data last updated" date
