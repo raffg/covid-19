@@ -15,12 +15,6 @@ server = app.server
 app.config.suppress_callback_exceptions = True
 app.title = 'COVID-19'
 
-data = pd.read_csv('data/df_worldwide.csv')
-data['date'] = pd.to_datetime(data['date'])
-
-# selects the "data last updated" date
-update = data['date'].dt.strftime('%B %d, %Y').iloc[-1]
-
 dash_colors = {
     'background': '#111111',
     'text': '#BEBEBE',
@@ -30,7 +24,14 @@ dash_colors = {
     'green': '#5bc246'
 }
 
-available_countries = sorted(data['Country/Region'].unique())
+df_worldwide = pd.read_csv('data/df_worldwide.csv')
+df_worldwide['percentage'] = df_worldwide['percentage'].astype(str)
+df_worldwide['date'] = pd.to_datetime(df_worldwide['date'])
+
+# selects the "data last updated" date
+update = df_worldwide['date'].dt.strftime('%B %d, %Y').iloc[-1]
+
+available_countries = sorted(df_worldwide['Country/Region'].unique())
 
 states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
           'Colorado', 'Connecticut', 'Delaware', 'District of Columbia',
@@ -67,21 +68,22 @@ region_options = {'Worldwide': available_countries,
                   'Europe': eu,
                   'China': china}
 
-df_worldwide = pd.read_csv('data/df_worldwide.csv')
-df_worldwide['percentage'] = df_worldwide['percentage'].astype(str)
-
 df_us = pd.read_csv('data/df_us.csv')
 df_us['percentage'] = df_us['percentage'].astype(str)
+df_us['date'] = pd.to_datetime(df_us['date'])
 
 df_eu = pd.read_csv('data/df_eu.csv')
 df_eu['percentage'] = df_eu['percentage'].astype(str)
+df_eu['date'] = pd.to_datetime(df_eu['date'])
 
 df_china = pd.read_csv('data/df_china.csv')
 df_china['percentage'] = df_china['percentage'].astype(str)
+df_china['date'] = pd.to_datetime(df_china['date'])
 
 df_us_counties = pd.read_csv('data/df_us_county.csv')
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
 df_us_counties['Country/Region'] = df_us_counties['Country/Region'].astype(str)
+df_us_counties['date'] = pd.to_datetime(df_us_counties['date'])
 
 @app.callback(
     Output('confirmed_ind', 'figure'),
@@ -91,7 +93,7 @@ def confirmed(view):
     creates the CUMULATIVE CONFIRMED indicator
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
     elif view == 'United States':
         df = df_us
     elif view == 'Europe':
@@ -99,7 +101,7 @@ def confirmed(view):
     elif view == 'China':
         df = df_china
     else:
-        df = data
+        df = df_worldwide
 
     value = df[df['date'] == df['date'].iloc[-1]]['Confirmed'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Confirmed'].sum()
@@ -133,7 +135,7 @@ def active(view):
     creates the CURRENTLY ACTIVE indicator
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
     elif view == 'United States':
         df = df_us
     elif view == 'Europe':
@@ -141,7 +143,7 @@ def active(view):
     elif view == 'China':
         df = df_china
     else:
-        df = data
+        df = df_worldwide
 
     value = df[df['date'] == df['date'].iloc[-1]]['Active'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Active'].sum()
@@ -175,7 +177,7 @@ def recovered(view):
     creates the RECOVERED CASES indicator
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
     elif view == 'United States':
         df = df_us
     elif view == 'Europe':
@@ -183,7 +185,7 @@ def recovered(view):
     elif view == 'China':
         df = df_china
     else:
-        df = data
+        df = df_worldwide
 
     value = df[df['date'] == df['date'].iloc[-1]]['Recovered'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Recovered'].sum()
@@ -217,7 +219,7 @@ def deaths(view):
     creates the DEATHS TO DATE indicator
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
     elif view == 'United States':
         df = df_us
     elif view == 'Europe':
@@ -225,7 +227,7 @@ def deaths(view):
     elif view == 'China':
         df = df_china
     else:
-        df = data
+        df = df_worldwide
 
     value = df[df['date'] == df['date'].iloc[-1]]['Deaths'].sum()
     delta = df[df['date'] == df['date'].unique()[-2]]['Deaths'].sum()
@@ -527,31 +529,27 @@ def trajectory(view, date_index):
     creates the lower-right chart (trajectory)
     '''
     if view == 'Worldwide':
-        df = data
+        df = df_worldwide
         scope = 'countries'
-        threshold = 1000
+        threshold = 10000
     elif view == 'United States':
-        df = data[data['Country/Region'] == 'US']
-        df = df.drop('Country/Region', axis=1)
-        df = df.rename(columns={'Province/State': 'Country/Region'})
+        df = df_us
         scope = 'states'
-        threshold = 1000
+        threshold = 5000
     elif view == 'Europe':
-        df = data[data['Country/Region'].isin(eu)]
+        df = df_eu
         scope = 'countries'
-        threshold = 1000
+        threshold = 5000
     elif view == 'China':
-        df = data[data['Country/Region'] == 'China']
-        df = df.drop('Country/Region', axis=1)
-        df = df.rename(columns={'Province/State': 'Country/Region'})
+        df = df_china
         scope = 'provinces'
         threshold = 1000
     else:
-        df = data
+        df = df_worldwide
         scope = 'countries'
-        threshold = 1000
+        threshold = 10000
 
-    date = data['date'].unique()[date_index]
+    date = df_worldwide['date'].unique()[date_index]
 
     df = df.groupby(['date', 'Country/Region'], as_index=False)['Confirmed'].sum()
     df['previous_week'] = df.groupby(['Country/Region'])['Confirmed'].shift(7, fill_value=0)
@@ -609,7 +607,7 @@ def trajectory(view, date_index):
     return {
         'data': traces,
         'layout': go.Layout(
-                title='Trajectory of Cases<br>({} with greater than {} confirmed cases)'.format(scope, threshold),
+                title='Trajectory of Cases<br>({} with greater than {:,} confirmed cases)'.format(scope, threshold),
                 xaxis_type="log",
                 yaxis_type="log",
                 xaxis_title='Total Confirmed Cases',
@@ -768,17 +766,17 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
             'display': 'inline-block'}),
 
     html.Div(html.Div(dcc.Slider(id='date_slider',
-                min=list(range(len(data['date'].unique())))[0],
-                max=list(range(len(data['date'].unique())))[-1],
-                value=list(range(len(data['date'].unique())))[-1],
+                min=list(range(len(df_worldwide['date'].unique())))[0],
+                max=list(range(len(df_worldwide['date'].unique())))[-1],
+                value=list(range(len(df_worldwide['date'].unique())))[-1],
                 marks={(idx): {'label': date.format(u"\u2011", u"\u2011") if
                     (idx-4)%7==0 else '', 'style':{'transform': 'rotate(30deg) translate(0px, 7px)'}} for idx, date in
                     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
-                    item in data['date']])))},  # for weekly marks,
+                    item in df_worldwide['date']])))},  # for weekly marks,
                 # marks={(idx): (date.format(u"\u2011", u"\u2011") if
                 #     date[4:6] in ['01', '15'] else '') for idx, date in
                 #     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
-                #     item in data['date']])))},  # for bi-monthly makrs
+                #     item in df_worldwide['date']])))},  # for bi-monthly makrs
                 step=1,
                 vertical=False,
                 updatemode='mouseup'),
