@@ -65,12 +65,3 @@ The infection map features a circular marker over each sub-region. The size of t
 ![trajectory](images/trajectory.png)
 
 This chart displays the trajectory of the pandemic within sub-regions. The x-axis displays the cumulative confirmed count by sub-region and the y-axis displays the count of cases which were confirmed in the previous week. With this visualization, once a sub-region has managed to control the pandemic to some extent, the line should suddenly drop down, as China (green) and South Korea (orange) have in the image. Although `date` is not on either of the axes, the data is still plotted by date; hovering over any line will display the date on which that data point was recorded. Additionally, the date slider on the bottom also controls this chart; so along with the map, the progress throughout time of the trajectories can be inspected.
-
- ---
-
- ## Application Error
-
- Sometimes when visiting the dashboard, you may encounter the following application error in your browser:
- ![application error](images/application_error.png)
-
- Simply wait a few minutes and reload the page. If the site is not visited for 30 minutes, Heroku automatically puts it to sleep and then wakes it up again the next time someone visits the url. When putting it to sleep, Heroku clears out all of the data and must reload it when waking the site up again. This process can sometimes cause a time-out error to occur on the server, and Heroku offers up this error screen. Again, the fix is to simply wait a few minutes and try again.
