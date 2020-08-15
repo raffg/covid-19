@@ -595,7 +595,8 @@ def trajectory(view, date_index):
                                 line=dict(width=0)),
                     line=dict(color=line_color, width=2),
                     name=country,
-                    text = ['{}: {:,} confirmed; {:,} from previous week'.format(country,
+                    text = ['{}, {}: {:,} confirmed; {:,} from previous week'.format(country,
+                                                                                trace_data['date'].iloc[i],
                                                                                 trace_data['Confirmed'].iloc[i],
                                                                                 trace_data['new_cases'].iloc[i]) \
                                                                                     for i in range(len(trace_data))],
