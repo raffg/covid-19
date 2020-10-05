@@ -710,24 +710,24 @@ def population_to_worldwide(df, pop_global):
     df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop(columns='region')
 
     # correct mismatched country names
-    df.loc[df['Country/Region'] == 'Bolivia', ['population']] = pop_global.loc[pop_global['region'] == 'Bolivia (Plurinational State of)']['population'].values
-    df.loc[df['Country/Region'] == 'Brunei', ['population']] = pop_global.loc[pop_global['region'] == 'Brunei Darussalam']['population'].values
-    df.loc[df['Country/Region'] == 'Burma', ['population']] = pop_global.loc[pop_global['region'] == 'Myanmar']['population'].values
-    df.loc[df['Country/Region'] == 'Congo (Brazzaville)', ['population']] = pop_global.loc[pop_global['region'] == 'Congo']['population'].values
-    df.loc[df['Country/Region'] == 'Congo (Kinshasa)', ['population']] = pop_global.loc[pop_global['region'] == 'Democratic Republic of the Congo']['population'].values
-    df.loc[df['Country/Region'] == "Cote d'Ivoire", ['population']] = pop_global.loc[pop_global['region'] == "Côte d'Ivoire"]['population'].values
-    df.loc[df['Country/Region'] == 'Iran', ['population']] = pop_global.loc[pop_global['region'] == 'Iran (Islamic Republic of)']['population'].values
+    df.loc[df['Country/Region'] == 'Bolivia', ['population']] = pop_global.loc[pop_global['region'] == 'Bolivia (Plurinational State of)'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Brunei', ['population']] = pop_global.loc[pop_global['region'] == 'Brunei Darussalam'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Burma', ['population']] = pop_global.loc[pop_global['region'] == 'Myanmar'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Congo (Brazzaville)', ['population']] = pop_global.loc[pop_global['region'] == 'Congo'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Congo (Kinshasa)', ['population']] = pop_global.loc[pop_global['region'] == 'Democratic Republic of the Congo'].squeeze()['population']
+    df.loc[df['Country/Region'] == "Cote d'Ivoire", ['population']] = pop_global.loc[pop_global['region'] == "Côte d'Ivoire"].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Iran', ['population']] = pop_global.loc[pop_global['region'] == 'Iran (Islamic Republic of)'].squeeze()['population']
     df.loc[df['Country/Region'] == 'Kosovo', ['population']] = 1845000  # source: https://data.worldbank.org/country/kosovo
-    df.loc[df['Country/Region'] == 'South Korea', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Korea']['population'].values
-    df.loc[df['Country/Region'] == 'Laos', ['population']] = pop_global.loc[pop_global['region'] == "Lao People's Democratic Republic"]['population'].values
-    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova']['population'].values
-    df.loc[df['Country/Region'] == 'Russia', ['population']] = pop_global.loc[pop_global['region'] == 'Russian Federation']['population'].values
-    df.loc[df['Country/Region'] == 'Taiwan', ['population']] = pop_global.loc[pop_global['region'] == 'China, Taiwan Province of China']['population'].values
-    df.loc[df['Country/Region'] == 'Tanzania', ['population']] = pop_global.loc[pop_global['region'] == 'United Republic of Tanzania']['population'].values
-    df.loc[df['Country/Region'] == 'Venezuela', ['population']] = pop_global.loc[pop_global['region'] == 'Venezuela (Bolivarian Republic of)']['population'].values
-    df.loc[df['Country/Region'] == 'Vietnam', ['population']] = pop_global.loc[pop_global['region'] == 'Viet Nam']['population'].values
-    df.loc[df['Country/Region'] == 'Syria', ['population']] = pop_global.loc[pop_global['region'] == 'Syrian Arab Republic']['population'].values
-    df.loc[(df['Country/Region'] == 'US'), ['population']] = pop_global.loc[pop_global['region'] == 'United States of America']['population'].values
+    df.loc[df['Country/Region'] == 'South Korea', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Korea'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Laos', ['population']] = pop_global.loc[pop_global['region'] == "Lao People's Democratic Republic"].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Russia', ['population']] = pop_global.loc[pop_global['region'] == 'Russian Federation'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Taiwan', ['population']] = pop_global.loc[pop_global['region'] == 'China, Taiwan Province of China'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Tanzania', ['population']] = pop_global.loc[pop_global['region'] == 'United Republic of Tanzania'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Venezuela', ['population']] = pop_global.loc[pop_global['region'] == 'Venezuela (Bolivarian Republic of)'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Vietnam', ['population']] = pop_global.loc[pop_global['region'] == 'Viet Nam'].squeeze()['population']
+    df.loc[df['Country/Region'] == 'Syria', ['population']] = pop_global.loc[pop_global['region'] == 'Syrian Arab Republic'].squeeze()['population']
+    df.loc[(df['Country/Region'] == 'US'), ['population']] = pop_global.loc[pop_global['region'] == 'United States of America'].squeeze()['population']
 
     df['population'] = df['population'] / 100000
 
