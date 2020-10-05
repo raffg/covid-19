@@ -702,8 +702,8 @@ def china_population(pop_global):
     pop_china['region'] = pop_china['Region']
     pop_china['population'] = (pop_china['2018'] * 10000).astype(int)
     pop_china = pop_china[['region', 'population']]
-    pop_china.loc[31] = ['Hong Kong', pop_global[pop_global['region'] == 'China, Hong Kong SAR']['population'].values[0]]
-    pop_china.loc[32] = ['Macau', pop_global[pop_global['region'] == 'China, Macao SAR']['population'].values[0]]
+    pop_china.loc[31] = ['Hong Kong', pop_global[pop_global['region'] == 'China, Hong Kong SAR'].squeeze()['population']]
+    pop_china.loc[32] = ['Macau', pop_global[pop_global['region'] == 'China, Macao SAR'].squeeze()['population']]
     return pop_china
 
 def population_to_worldwide(df, pop_global):
@@ -735,14 +735,14 @@ def population_to_worldwide(df, pop_global):
 
 def population_to_us(df, pop_us):
     df = pd.merge(df, pop_us, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
-    df.loc[df['Country/Region'] == 'Recovered', ['population']] = pop_us[pop_us['region'] == 'United States']['population'].values[0]
+    df.loc[df['Country/Region'] == 'Recovered', ['population']] = pop_us[pop_us['region'] == 'United States'].squeeze()['population']
     df['population'] = df['population'] / 100000
     return df
 
 def population_to_eu(df, pop_global):
     df = pd.merge(df, pop_global, left_on='Country/Region', right_on='region', how='left').drop('region', axis=1)
     df.loc[df['Country/Region'] == 'Kosovo', ['population']] = 1845000  # source: https://data.worldbank.org/country/kosovo
-    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova']['population'].values
+    df.loc[df['Country/Region'] == 'Moldova', ['population']] = pop_global.loc[pop_global['region'] == 'Republic of Moldova'].squeeze()['population']
     df['population'] = df['population'] / 100000
     return df
 
