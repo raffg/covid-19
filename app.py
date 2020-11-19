@@ -728,7 +728,7 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                     dcc.RadioItems(
                         id='column_select',
                         options=[{'label': i, 'value': i} for i in ['Confirmed', 'Active', 'Recovered', 'Deaths']],
-                        value='Active',
+                        value='Confirmed',
                         labelStyle={'float': 'center', 'display': 'inline-block'},
                         style={'textAlign': 'center',
                             'color': dash_colors['text'],
