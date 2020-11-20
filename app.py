@@ -531,15 +531,15 @@ def trajectory(view, date_index):
     if view == 'Worldwide':
         df = df_worldwide
         scope = 'countries'
-        threshold = 10000
+        threshold = 50000
     elif view == 'United States':
         df = df_us
         scope = 'states'
-        threshold = 5000
+        threshold = 10000
     elif view == 'Europe':
         df = df_eu
         scope = 'countries'
-        threshold = 5000
+        threshold = 10000
     elif view == 'China':
         df = df_china
         scope = 'provinces'
@@ -547,7 +547,7 @@ def trajectory(view, date_index):
     else:
         df = df_worldwide
         scope = 'countries'
-        threshold = 10000
+        threshold = 50000
 
     date = df_worldwide['date'].unique()[date_index]
 
