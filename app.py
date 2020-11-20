@@ -396,7 +396,7 @@ def active_countries(view, countries, column, population):
 
     traces = []
     countries = df[(df['Country/Region'].isin(countries)) &
-                   (df['date'] == df['date'].max())].groupby('Country/Region')['Active'].sum().sort_values(ascending=False).index.to_list()
+                   (df['date'] == df['date'].max())].groupby('Country/Region')['Confirmed'].sum().sort_values(ascending=False).index.to_list()
     for country in countries:
         if population == 'absolute':
             y_data = df[df['Country/Region'] == country].groupby('date')[column].sum()
