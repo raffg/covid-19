@@ -774,10 +774,10 @@ app.layout = html.Div(style={'backgroundColor': dash_colors['background']}, chil
                     (idx-4)%7==0 else '', 'style':{'transform': 'rotate(30deg) translate(0px, 7px)'}} for idx, date in
                     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
                     item in df_worldwide['date']])))},  # for weekly marks,
-                # marks={(idx): (date.format(u"\u2011", u"\u2011") if
-                #     date[4:6] in ['01', '15'] else '') for idx, date in
+                # marks={(idx): {'label': date.format(u"\u2011", u"\u2011") if
+                #     date[4:6] in ['01', '15'] else '', 'style':{'transform': 'rotate(30deg) translate(0px, 7px)'}} for idx, date in
                 #     enumerate(sorted(set([item.strftime("%m{}%d{}%Y") for
-                #     item in df_worldwide['date']])))},  # for bi-monthly makrs
+                #     item in df_worldwide['date']])))},  # for bi-monthly marks
                 step=1,
                 vertical=False,
                 updatemode='mouseup'),
