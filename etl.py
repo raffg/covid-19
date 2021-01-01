@@ -637,6 +637,7 @@ def us_county(data):
     df.loc[df['share_of_last_week'] < 0, 'share_of_last_week'] = 0
     df['percentage'] = df['share_of_last_week'].apply(lambda x: '{:.1f}'.format(x))
     df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
+    df = df[df['Confirmed'] != 0]
     return df
 
 def us_county_compressed(data, df_us):
