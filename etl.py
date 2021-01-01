@@ -670,6 +670,7 @@ def us_county_compressed(data, df_us):
     df = pd.concat([df, df_us]).sort_values('date')
 
     df = df[['date', 'Country/Region', 'Latitude', 'Longitude', 'Confirmed', 'Deaths', 'Recovered', 'Active', 'share_of_last_week', 'percentage']]
+    df = df[df['Confirmed'] != 0]
     return df
 
 def global_population():
