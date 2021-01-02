@@ -98,7 +98,7 @@ def load_time_series(source='web', update='manual'):
 
     dates = []
     for column in confirmed_global.columns:
-        if re.search(r'([0-9]{1,2}\/[0-9]{1,2}\/(20))', column):
+        if re.search(r'([0-9]{1,2}\/[0-9]{1,2}\/([20-99]))', column):
             dates.append(column)
 
     print()
