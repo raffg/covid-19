@@ -786,6 +786,8 @@ def main(update):
     df_us_county[int(len(df_us_county) / 4) : 2 * int(len(df_us_county) / 4)].to_csv('data/df_us_county2.csv', index=False)
     df_us_county[2 * int(len(df_us_county) / 4) : 3 * int(len(df_us_county) / 4)].to_csv('data/df_us_county3.csv', index=False)
     df_us_county[3 * int(len(df_us_county) / 4) :].to_csv('data/df_us_county4.csv', index=False)
+    # df_us_county[: int(len(df_us_county) / 2)].to_csv('data/df_us_county1.csv', index=False)
+    # df_us_county[int(len(df_us_county) / 2) : ].to_csv('data/df_us_county2.csv', index=False)
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
