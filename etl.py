@@ -782,7 +782,8 @@ def main(update):
 
     df_us_county = us_county(data)  # full historical US county-level data
     # df_us_county = us_county_compressed(data, df_us)  # historical US state-level data
-    df_us_county.to_csv('data/df_us_county.csv', index=False)
+    df_us_county[:int(len(df_us_county)/2)].to_csv('data/df_us_county1.csv', index=False)
+    df_us_county[int(len(df_us_county)/2):].to_csv('data/df_us_county2.csv', index=False)
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

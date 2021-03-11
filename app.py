@@ -81,7 +81,7 @@ df_china = pd.read_csv('data/df_china.csv')
 df_china['percentage'] = df_china['percentage'].astype(str)
 df_china['date'] = pd.to_datetime(df_china['date'])
 
-df_us_counties = pd.read_csv('data/df_us_county.csv')
+df_us_counties = pd.concat([pd.read_csv('data/df_us_county1.csv'), pd.read_csv('data/df_us_county2.csv')], ignore_index=True)
 df_us_counties['percentage'] = df_us_counties['percentage'].astype(str)
 df_us_counties['Country/Region'] = df_us_counties['Country/Region'].astype(str)
 df_us_counties['date'] = pd.to_datetime(df_us_counties['date'])
